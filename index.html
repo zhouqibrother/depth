@@ -2,455 +2,722 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>一位比特国王 · 恐慌深度</title>
-<meta name="description" content="十六个全球市场的恐慌深度读数。一个比特：该买，或者不该买。">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- Safari 地址栏跟着页面变色，明暗各一套 -->
+<meta name="theme-color" content="#EAEEF1" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#101820" media="(prefers-color-scheme: dark)">
+<!-- iOS 添加到主屏幕后全屏运行，没有 Safari 外壳 -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="恐慌深度">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="favicon.png" sizes="32x32">
+<link rel="manifest" href="site.webmanifest">
+<title>一位比特国王 · 贪婪恐慌深度</title>
+<meta name="description" content="十六个全球市场的贪婪恐慌深度。越绿越便宜，越红越贵。">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --ink:#0B0714; --vault:#150F24; --vault2:#1B1430;
-  --edge:#241A3A; --edge-soft:#1C1430;
-  --pearl:#D8D2E8; --ash:#8378A0; --dusk:#584B72;
-  --crown:#E6B450;                     /* 只给王冠与「一个比特」用 */
-  --quartz:#7FE3D4;                    /* 价格线 */
-  --l1:#3D5A8A; --l2:#C9932E; --l3:#D9622F; --l4:#D6335C;
-  --g1:#5B8A3D; --g2:#8FA83D; --g3:#C9A02E; --g4:#E6501E;   /* 贪婪档，跟恐慌档l1-l4区分色系 */
-  --display:"Sora",-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+  --paper:#EAEEF1; --card:#F6F8F9; --sunk:#DFE5E9;
+  --rule:#C6D0D7; --rule-soft:#D8E0E5;
+  --ink:#16242F; --ink2:#3E535F; --ink3:#5A6E7A;
+  --crown:#8A620F; --warnbg:#FBF2DC; --warnbd:#8C640C; --warnfg:#5F440A;
+  --z1:#2E6B4B; --z2:#1E5C3C; --z3:#124C30; --z4:#05341F;
+  --g1:#8E3826; --g2:#7C2C1D; --g3:#6D1E1A; --g4:#5E1019;
+  --tipbg:#16242F; --tipfg:#FFFFFF; --tipac:#8FD8B4;
+  --ui:"Sora","Noto Sans SC",-apple-system,"PingFang SC",sans-serif;
   --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
 }
+html[data-theme="dark"]{
+  --paper:#101820; --card:#17222C; --sunk:#1E2A35;
+  --rule:#2C3B47; --rule-soft:#243039;
+  --ink:#DCE5EA; --ink2:#A3B6C2; --ink3:#7E96A4;
+  --crown:#D9A93F; --warnbg:#2E2612; --warnbd:#B98D2A; --warnfg:#E7CB84;
+  --z1:#6BD79F; --z2:#55D190; --z3:#42CE84; --z4:#2FE58C;
+  --g1:#FF7458; --g2:#FF6A5C; --g3:#FF5F62; --g4:#FF5468;
+  --tipbg:#DCE5EA; --tipfg:#101820; --tipac:#1B5D3D;
+}
 *{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%}
-body{
-  margin:0;background:var(--ink);color:var(--pearl);
-  font-family:var(--display);font-weight:300;font-size:15px;line-height:1.6;
-  -webkit-font-smoothing:antialiased;
+html{
+  -webkit-text-size-adjust:100%;scroll-behavior:smooth;
+  -webkit-tap-highlight-color:transparent;      /* 去掉 iOS 点击时的灰块闪烁 */
 }
-.wrap{max-width:1160px;margin:0 auto;padding:0 26px}
-a{color:var(--crown);text-decoration:none;border-bottom:1px solid rgba(230,180,80,.3)}
-a:hover{border-bottom-color:var(--crown)}
+button,a{touch-action:manipulation}             /* 禁掉双击缩放的 300ms 延迟 */
+::selection{background:var(--crown);color:#fff}
+body{margin:0;background:var(--paper);color:var(--ink);
+  font-family:var(--ui);font-size:17px;line-height:1.7;-webkit-font-smoothing:antialiased;
+  transition:background .2s,color .2s}
+.wrap{max-width:1180px;margin:0 auto;
+  padding:0 calc(28px + env(safe-area-inset-left)) 0 calc(28px + env(safe-area-inset-right))}
 
-/* ---------- 王冠标识 ---------- */
-.brand{display:flex;align-items:center;gap:11px;padding:34px 0 0}
-.crown-mark{width:26px;height:20px;flex-shrink:0}
-.brand-name{font-family:var(--display);font-weight:800;font-size:16px;letter-spacing:.02em}
-.brand-at{font-family:var(--mono);font-size:12px;color:var(--dusk);margin-left:auto}
+.brand{display:flex;align-items:center;gap:13px;padding:26px 0 0;flex-wrap:wrap}
+.crown{width:32px;height:25px;flex-shrink:0}
+.crown path{stroke:var(--crown)}
+.brand-name{font-weight:800;font-size:21px;letter-spacing:.01em}
+.tools{margin-left:auto;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.pill{
+  display:inline-flex;align-items:center;gap:7px;font-family:var(--ui);
+  font-size:14.5px;font-weight:600;color:var(--ink2);text-decoration:none;
+  border:2px solid var(--rule);border-radius:22px;padding:6px 14px;
+  background:var(--card);cursor:pointer;transition:border-color .15s,color .15s;
+}
+.pill:hover{border-color:var(--ink);color:var(--ink)}
+.pill.on{border-color:var(--crown);color:var(--crown)}
+.pill svg{width:15px;height:15px;fill:currentColor}
+.pill.mono{font-family:var(--mono)}
 
-/* ---------- hero ---------- */
-header{padding:58px 0 52px}
-h1{
-  font-family:var(--display);font-weight:800;
-  font-size:clamp(40px,7.4vw,78px);line-height:.98;
-  letter-spacing:-.035em;margin:0 0 26px;max-width:15ch;
-}
-h1 .bit{
-  font-family:var(--mono);font-weight:700;color:var(--crown);
-  font-size:.86em;letter-spacing:-.02em;
-}
-.lede{max-width:46ch;color:var(--ash);font-size:16.5px;margin:0}
-.counter{
-  display:flex;gap:0;margin-top:44px;border:1px solid var(--edge);
-  border-radius:5px;overflow:hidden;background:var(--vault);flex-wrap:wrap;
-}
-.counter div{flex:1;min-width:118px;padding:17px 20px;border-right:1px solid var(--edge)}
-.counter div:last-child{border-right:none}
-.counter b{display:block;font-family:var(--mono);font-weight:700;font-size:27px;line-height:1.1}
-.counter span{
-  display:block;font-family:var(--mono);font-size:10px;letter-spacing:.16em;
-  text-transform:uppercase;color:var(--dusk);margin-top:6px;
-}
+header{padding:40px 0 34px}
+h1{font-weight:800;font-size:clamp(36px,5.4vw,62px);line-height:1.09;
+   letter-spacing:-.025em;margin:0}
+.scale{margin-top:32px;max-width:580px}
+.scale-bar{height:14px;border-radius:7px;border:1px solid var(--rule)}
+.scale-ends{display:flex;justify-content:space-between;gap:12px;margin-top:9px;
+  font-size:14.5px;font-weight:600}
 
-/* ---------- 一览 ---------- */
-.band{padding:40px 0;border-top:1px solid var(--edge)}
-.band-head{display:flex;justify-content:space-between;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:24px}
-.kicker{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--dusk);margin:0}
-.legend{display:flex;gap:15px;font-family:var(--mono);font-size:11px;color:var(--ash);flex-wrap:wrap}
-.legend i{font-style:normal;width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:6px;vertical-align:1px}
+.notice{margin-top:22px;background:var(--warnbg);border:2px solid var(--warnbd);
+  color:var(--warnfg);padding:14px 18px;border-radius:8px;font-size:16.5px;font-weight:500}
+
+/* 吸顶导航：16 个色块，滚到哪儿都能一键跳 */
+.navbar{
+  position:sticky;top:0;z-index:15;
+  background:color-mix(in srgb, var(--paper) 82%, transparent);
+  -webkit-backdrop-filter:saturate(180%) blur(14px);
+  backdrop-filter:saturate(180%) blur(14px);
+  border-bottom:2px solid var(--rule);margin:0 -28px;
+  padding:11px 28px calc(11px) 28px;display:none;
+}
+@supports not (backdrop-filter:blur(1px)){.navbar{background:var(--paper)}}
+.navbar.show{display:block}
+.navstrip{display:flex;gap:8px;overflow-x:auto;scrollbar-width:thin;padding-bottom:2px;
+  -webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+.navstrip::-webkit-scrollbar{height:5px}
+.navstrip::-webkit-scrollbar-thumb{background:var(--rule);border-radius:3px}
+.chip{
+  flex:0 0 auto;display:flex;align-items:center;gap:7px;text-decoration:none;
+  font-family:var(--mono);font-size:13.5px;font-weight:700;color:var(--ink2);
+  border:2px solid var(--rule);border-radius:18px;padding:4px 11px 4px 6px;
+  background:var(--card);white-space:nowrap;
+}
+.chip:hover{border-color:var(--ink);color:var(--ink)}
+.chip i{width:11px;height:11px;border-radius:50%;flex-shrink:0}
+
+.band{padding:36px 0 44px;border-top:2px solid var(--rule)}
+.band-head{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:16px}
+h2{font-size:22px;font-weight:700;margin:0;letter-spacing:-.01em}
+.summary{font-size:18px;color:var(--ink2);margin:0 0 22px;line-height:1.6;max-width:72ch}
+.summary b{font-family:var(--mono);font-weight:700;color:var(--ink)}
 #ribbon{width:100%;height:auto;display:block}
+#ribbon a{cursor:pointer}
+#ribbon a:hover text{opacity:.55;text-decoration:underline}
 
-/* ---------- 贪婪档 ---------- */
-.greed-legend{display:flex;gap:15px;font-family:var(--mono);font-size:11px;color:var(--ash);flex-wrap:wrap;margin-bottom:16px}
-.greed-legend i{font-style:normal;width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:6px;vertical-align:1px}
-.greed-disclaimer{
-  margin:0;padding:13px 16px;background:rgba(201,160,46,.07);border:1px solid var(--g3);
-  border-radius:4px;font-size:12.5px;color:var(--ash);line-height:1.6;max-width:72ch;
-}
-.greed-disclaimer .en{display:block;margin-top:5px;color:var(--dusk);font-size:11.5px}
-.p-note-greed{
-  margin:0;padding:0 22px 16px;font-size:11.5px;color:var(--g3);line-height:1.5;max-width:70ch;
-}
+.panels{padding-bottom:60px}
+.panel{scroll-margin-top:76px;border:2px solid var(--rule);border-left-width:7px;
+  border-radius:12px;background:var(--card);margin-bottom:22px;overflow:hidden}
+.ptop{display:grid;grid-template-columns:1fr auto;gap:24px;padding:24px 26px 18px;align-items:start}
+.psym{font-family:var(--mono);font-size:15px;color:var(--ink3);margin:0 0 8px;letter-spacing:.06em}
+.pname{font-weight:700;font-size:30px;line-height:1.15;margin:0;letter-spacing:-.02em}
+.pprice{font-family:var(--mono);font-weight:700;font-size:24px;margin:12px 0 0;
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;color:var(--ink)}
+.pprice em{font-style:normal;font-size:15px;color:var(--ink3);font-weight:500}
+.live{display:inline-flex;align-items:center;gap:7px;font-family:var(--ui);
+  font-size:14px;font-weight:600;color:var(--z2);background:var(--sunk);
+  padding:3px 11px;border-radius:20px}
+.live i{width:9px;height:9px;border-radius:50%;background:currentColor;animation:beat 2s infinite}
+@keyframes beat{0%,100%{opacity:1}50%{opacity:.25}}
+.pright{display:flex;align-items:center;gap:20px}
+.ppct{text-align:right}
+.ppct b{display:block;font-family:var(--mono);font-weight:700;font-size:42px;line-height:1}
+.ppct span{display:block;font-size:14.5px;color:var(--ink3);margin-top:6px;font-weight:500}
+.disc{min-width:112px;padding:13px 16px;flex-shrink:0;border-radius:12px;display:flex;
+  flex-direction:column;align-items:center;justify-content:center;
+  font-weight:700;color:#fff;line-height:1.2;text-align:center}
+html[data-theme="dark"] .disc{color:#101820}
+.disc .act{font-size:19px;letter-spacing:.02em;white-space:nowrap}
+.disc:has(.act:only-child) .act{font-size:20px}
+.disc .st{font-family:var(--mono);font-size:12px;opacity:.85;margin-top:5px;font-weight:500}
+.pmeta{padding:0 26px 18px;display:flex;gap:24px;flex-wrap:wrap;font-size:16.5px;color:var(--ink2)}
+.pmeta b{font-family:var(--mono);font-weight:700;color:var(--ink)}
+.pchart{position:relative;padding:0 14px 14px}
+.pchart svg{width:100%;height:auto;display:block;overflow:visible}
+.prof{margin:0 26px 18px;border-top:2px solid var(--rule-soft);padding-top:14px}
+.prof summary{font-size:16px;font-weight:600;color:var(--ink2);cursor:pointer;list-style:none}
+.prof summary::-webkit-details-marker{display:none}
+.prof summary::before{content:'▸ ';color:var(--ink3)}
+.prof[open] summary::before{content:'▾ '}
+.prof table{width:100%;border-collapse:collapse;margin-top:12px;font-size:15.5px}
+.prof td{padding:7px 10px 7px 0;border-bottom:1px solid var(--rule-soft);vertical-align:baseline}
+.prof tr:last-child td{border-bottom:none}
+.prof .k{font-weight:700;white-space:nowrap}
+.prof .n{font-family:var(--mono);color:var(--ink2);white-space:nowrap}
+.prof .est{font-family:var(--mono);font-weight:700;color:var(--ink);white-space:nowrap}
+.prof .miss{color:var(--ink3)}
+.pnote{margin:0;padding:0 26px 20px;font-size:15.5px;color:var(--ink3);line-height:1.6;max-width:74ch}
+.pnote-greed{margin:0;padding:0 26px 20px;font-size:15.5px;color:var(--crown);font-weight:600;line-height:1.6;max-width:74ch}
 
-/* ---------- 资产面板 ---------- */
-.panels{padding:8px 0 40px}
-.panel{
-  border:1px solid var(--edge);border-radius:6px;background:var(--vault);
-  margin-bottom:14px;overflow:hidden;
-}
-.panel-top{
-  display:grid;grid-template-columns:1fr auto;gap:20px;
-  padding:19px 22px 15px;align-items:start;
-}
-.p-sym{font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;color:var(--dusk);margin:0 0 5px}
-.p-name{font-family:var(--display);font-weight:600;font-size:21px;letter-spacing:-.015em;margin:0}
-.p-px{font-family:var(--mono);font-size:13px;color:var(--quartz);margin:7px 0 0}
-.p-px em{font-style:normal;color:var(--dusk);font-size:10.5px;margin-left:5px;letter-spacing:.08em}
-.p-right{display:flex;align-items:center;gap:18px}
-.p-pct{text-align:right}
-.p-pct b{display:block;font-family:var(--mono);font-weight:700;font-size:25px;line-height:1}
-.p-pct span{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;color:var(--dusk);margin-top:5px}
-.bitbox{
-  width:56px;height:56px;flex-shrink:0;border-radius:5px;
-  display:flex;align-items:center;justify-content:center;
-  font-family:var(--mono);font-weight:700;font-size:30px;line-height:1;
-  border:1px solid var(--edge);color:var(--dusk);background:var(--ink);
-}
-.bitbox.on{color:var(--crown);border-color:var(--crown);background:rgba(230,180,80,.07)}
-.p-meta{
-  padding:0 22px 15px;display:flex;gap:20px;flex-wrap:wrap;
-  font-family:var(--mono);font-size:11px;color:var(--dusk);
-}
-.p-meta u{text-decoration:none;color:var(--ash)}
-.p-chart{position:relative;padding:0 10px 12px}
-.p-chart svg{width:100%;height:auto;display:block;overflow:visible}
-.p-note{
-  margin:0;padding:0 22px 16px;font-size:11.5px;color:var(--dusk);
-  line-height:1.5;max-width:70ch;
-}
-.tip{
-  position:absolute;pointer-events:none;opacity:0;transition:opacity .1s;
-  background:var(--vault2);border:1px solid var(--edge);border-radius:4px;
-  padding:8px 11px;font-family:var(--mono);font-size:11px;white-space:nowrap;
-  transform:translate(-50%,-118%);z-index:6;line-height:1.5;
-}
-.tip b{color:var(--pearl);font-weight:500}
-.tip u{text-decoration:none;color:var(--quartz);display:block}
-.tip i{font-style:normal;color:var(--dusk);display:block;font-size:10px}
+.tip{position:absolute;pointer-events:none;opacity:0;transition:opacity .1s;
+  background:var(--tipbg);color:var(--tipfg);border-radius:8px;padding:12px 16px;
+  font-family:var(--mono);font-size:15.5px;white-space:nowrap;
+  transform:translate(-50%,-118%);z-index:6;line-height:1.6;font-weight:500}
+.tip u{text-decoration:none;color:var(--tipac);display:block}
+.tip i{font-style:normal;opacity:.65;display:block;font-size:14px}
 
-footer{border-top:1px solid var(--edge);padding:34px 0 64px;color:var(--dusk);font-size:12.5px}
-footer p{max-width:64ch;margin:0 0 11px;line-height:1.6}
-footer code{font-family:var(--mono);font-size:11.5px;color:var(--ash)}
-.copyright{margin-top:22px;font-family:var(--mono);font-size:11px;color:var(--dusk)}
-.banner{
-  margin-top:24px;background:rgba(201,147,46,.08);border:1px solid var(--l2);
-  color:var(--l2);padding:11px 15px;border-radius:4px;
-  font-family:var(--mono);font-size:11.5px;
-}
+#top{position:fixed;right:calc(26px + env(safe-area-inset-right));
+  bottom:calc(26px + env(safe-area-inset-bottom));width:52px;height:52px;border-radius:50%;
+  border:2px solid var(--rule);background:var(--card);color:var(--ink2);
+  font-size:22px;cursor:pointer;display:none;align-items:center;justify-content:center;
+  box-shadow:0 3px 14px rgba(0,0,0,.18);z-index:20}
+#top:hover{border-color:var(--ink);color:var(--ink)}
+#top.show{display:flex}
 
-@media (max-width:760px){
+footer{border-top:2px solid var(--rule);padding:36px 0 90px;color:var(--ink2);font-size:16.5px}
+footer p{max-width:64ch;margin:0 0 14px;line-height:1.65}
+footer code{font-family:var(--mono);font-size:15px;color:var(--ink);background:var(--sunk);padding:2px 7px;border-radius:4px}
+.copyright{margin-top:24px;font-size:15px;color:var(--ink3)}
+
+@media (max-width:780px){
+  body{font-size:16.5px}
   .wrap{padding:0 17px}
-  header{padding:40px 0 36px}
-  .panel-top{grid-template-columns:1fr;gap:14px}
-  .p-right{justify-content:space-between}
-  .p-name{font-size:19px}
+  .navbar{margin:0 -17px;padding:9px 17px}
+  header{padding:30px 0 26px}
+  .ptop{grid-template-columns:1fr;gap:16px}
+  .pright{justify-content:space-between}
+  .pname{font-size:26px}
+  .ppct b{font-size:36px}
+  .disc{min-width:98px;padding:11px 13px}
+  .disc .act{font-size:17px}
+  #top{right:16px;bottom:16px}
 }
-:focus-visible{outline:2px solid var(--crown);outline-offset:3px}
+:focus-visible{outline:3px solid var(--crown);outline-offset:3px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+/* 系统开启「增强对比度」时加粗描边 */
+@media (prefers-contrast:more){
+  .panel,.pill,.chip,#top{border-color:var(--ink)}
+  .summary,.pmeta,footer{color:var(--ink)}
+}
 </style>
 </head>
 <body>
 <div class="wrap">
 
   <div class="brand">
-    <svg class="crown-mark" viewBox="0 0 26 20" aria-hidden="true">
+    <svg class="crown" viewBox="0 0 26 20" aria-hidden="true">
       <path d="M2 17h22M3 15l-1.6-11 6.4 5L13 2l5.2 7 6.4-5L23 15z"
-            fill="none" stroke="#E6B450" stroke-width="1.6"
-            stroke-linejoin="round" stroke-linecap="round"/>
+            fill="none" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
     </svg>
-    <span class="brand-name">一位比特国王</span>
-    <span class="brand-at">@onebitking</span>
+    <span class="brand-name" id="brandName">一位比特国王</span>
+    <div class="tools">
+      <button class="pill mono" id="langBtn" type="button">EN</button>
+      <button class="pill" id="themeBtn" type="button" title="">☾</button>
+      <button class="pill" id="cbBtn" type="button"></button>
+      <button class="pill" id="copyBtn" type="button"></button>
+      <a class="pill" href="https://x.com/onebitking" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.9 2H22l-7 8 8.2 12h-6.4l-5-7.3L5.9 22H2.8l7.5-8.6L2.4 2h6.6l4.5 6.7L18.9 2Zm-1.1 18h1.7L7.3 3.8H5.4L17.8 20Z"/></svg>
+        @onebitking
+      </a>
+    </div>
   </div>
 
+  <nav class="navbar" id="navbar"><div class="navstrip" id="navstrip"></div></nav>
+
   <header>
-    <h1>十六个市场，<br>一个<span class="bit">比特</span>。</h1>
-    <p class="lede">每个市场的恐慌程度，压进它自己几十年的历史里排个位次。跌进建仓区，这一位就置 1。其余时候，全是 0。</p>
-    <div class="counter">
-      <div><b id="c-on">—</b><span>置位</span></div>
-      <div><b id="c-total">—</b><span>标的</span></div>
-      <div><b id="c-low">—</b><span>最深分位</span></div>
-      <div><b id="c-date">—</b><span>数据日期</span></div>
+    <h1 id="h1"></h1>
+    <div class="scale">
+      <div class="scale-bar" id="scaleBar"></div>
+      <div class="scale-ends"><span id="scaleLo"></span><span id="scaleHi"></span></div>
     </div>
-    <div class="banner" id="demo-banner" hidden>正在显示示例数据。把 dashboard_data.json 放在同一目录即可看到真实读数。</div>
+    <div class="notice" id="stale" hidden></div>
+    <div class="notice" id="demoBanner" hidden></div>
   </header>
 
   <section class="band">
     <div class="band-head">
-      <h2 class="kicker">当前分布</h2>
-      <div class="legend" id="legend"></div>
+      <h2 id="distTitle"></h2>
+      <button class="pill" id="sortBtn" type="button"></button>
     </div>
-    <svg id="ribbon" viewBox="0 0 1000 250" role="img" aria-label="十六个标的当前恐慌分位分布"></svg>
-  </section>
-
-  <section class="band">
-    <div class="band-head">
-      <h2 class="kicker">贪婪档 · Greed Tiers</h2>
-    </div>
-    <div class="greed-legend" id="greed-legend"></div>
-    <p class="greed-disclaimer">
-      贪婪档为情绪参考。回测显示对长牛资产机械卖出显著跑输持有，详见验证报告。
-      <span class="en">Greed tiers are sentiment reference only. Backtesting shows that mechanically
-      selling long-bull assets significantly underperforms simply holding — see the validation report.</span>
-    </p>
+    <p class="summary" id="summary">—</p>
+    <svg id="ribbon" viewBox="0 0 1000 600" role="img"></svg>
   </section>
 
   <section class="panels" id="panels"></section>
 
-  <footer>
-    <p>纵轴是平方根刻度。四条档位线全挤在 0–20 这一小段，线性轴会把它们压成一条，看不出彼此距离。</p>
-    <p>价格轴取对数，因为这些标的十年里的量级差了几倍到几十倍。指数按本币计价，未做汇率换算。</p>
-    <p>刷新数据：<code>python3 export_dashboard.py</code>，然后替换 <code>dashboard_data.json</code>。</p>
-    <p class="copyright">© 2026 一位比特国王 · 保留所有权利。本站界面设计、图表实现与指标算法为原创作品，未经许可不得复制或用于商业用途。</p>
-  </footer>
+  <footer id="footer"></footer>
 </div>
+<button id="top" type="button" aria-label="Top">↑</button>
 
 <script>
 const NS='http://www.w3.org/2000/svg';
 const el=(t,a={})=>{const n=document.createElementNS(NS,t);for(const k in a)n.setAttribute(k,a[k]);return n;};
 const $=s=>document.querySelector(s);
 const V=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
-const ZC={L1:'--l1',L2:'--l2',L3:'--l3',L4:'--l4'};
-const GZC={G1:'--g1',G2:'--g2',G3:'--g3',G4:'--g4'};
+const ZC={L1:'--z1',L2:'--z2',L3:'--z3',L4:'--z4'};
 const SQ=v=>Math.sqrt(Math.max(0,v));
 const REDUCED=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const fmt=v=>v>=10?v.toFixed(1):v.toFixed(2);
-
-const SYMBOLS={USD:'$',EUR:'€',JPY:'¥',HKD:'HK$',CNY:'¥',INR:'₹'};
+const SYMS={USD:'$',EUR:'€',JPY:'¥',HKD:'HK$',CNY:'¥',INR:'₹'};
 function money(p,cur){
   if(p==null)return '—';
-  const s=SYMBOLS[cur]||'';
   const d=p>=1000?0:p>=10?2:4;
-  return s+p.toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});
+  return (SYMS[cur]||'')+p.toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});
 }
-/** 最严格的那一档，没进任何档位返回 null */
-function zoneOf(v,tiers){
-  let hit=null;
-  for(const t of tiers) if(t.max!=null&&v<=t.max) hit=t;
-  return hit;
+function zoneOf(v,tiers){let h=null;for(const t of tiers)if(t.max!=null&&v<=t.max)h=t;return h;}
+
+/* ================= 语言 ================= */
+const NAME_EN={'BTC-USD':'Bitcoin','GC=F':'Gold Futures','CL=F':'Crude Oil Futures',
+ '^GSPC':'S&P 500','^STOXX50E':'Euro Stoxx 50','^NSEI':'Nifty 50','^N225':'Nikkei 225',
+ '^HSI':'Hang Seng','000001.SS':'Shanghai Composite','AAPL':'Apple','MSFT':'Microsoft',
+ 'GOOGL':'Alphabet','NVDA':'NVIDIA','AMZN':'Amazon','TSLA':'Tesla','TSM':'TSMC'};
+const TIER_EN={'观察':'Watch','建仓':'Enter','加码':'Add','重仓':'Load up'};
+
+const I18N={
+ zh:{brand:'一位比特国王',h1:'十六个全球市场<br>贪婪恐慌深度',
+  scaleLo:'越绿 · 越恐慌 · 越便宜',scaleHi:'越红 · 越贪婪 · 越贵',
+  scaleLoCB:'越蓝 · 越恐慌 · 越便宜',scaleHiCB:'越橙 · 越贪婪 · 越贵',
+  dist:'当前分布',sortFear:'按恐慌程度排序',sortOrig:'按原顺序排列',
+  greed:'贪婪',fear:'恐慌',pct:'分位',copy:'复制概览',copied:'已复制',noTier:'不操作',deploy:'投 ',
+  profTitle:'历史画像 · 按本标的自己的数据',times:'次',lastAt:'上次',
+  never:'历史上从未到过',atHigh:'通常在高点附近',nextAt:(k,p)=>`进${k} ≈ ${p}`,
+  adviceHint:'当前读数落在哪一档。实际触发还需满足连续天数、AHR999 门槛和资金闸门',
+  greedHint:'贪婪档为情绪参考，不是卖出信号。回测显示对长牛资产机械卖出显著跑输持有，详见验证报告',
+  clfNote:'该标的贪婪三档经回测双重验证（事件研究 + 全策略模拟 + 阈值±5稳健性），详见验证报告',
+  cbOn:'色盲模式',cbOff:'常规配色',
+  demo:'正在显示示例数据。把 dashboard_data.json 放在同一目录，并用本地服务器打开。',
+  stale:(d,n)=>`数据停在 ${d}，已经 ${n} 天没更新了。重新跑一次 export_dashboard.py 再看。`,
+  inZone:(t,n,names,dn,dv)=>`${t} 个标的里，<b>${n}</b> 个已经跌进恐慌区：${names}。最恐慌的是 <b>${dn}</b>，分位 <b>${dv}</b>。`,
+  noZone:(t,dn,dv,gap,l1)=>`${t} 个标的都还没跌进恐慌区。最接近的是 <b>${dn}</b>，分位 <b>${dv}</b>，离 ${l1} 还差 <b>${gap}</b>。`,
+  gapTo:(k,g)=>`离 ${k} 还差 <b>${g}</b>`,already:k=>`已在 <b>${k}</b> 区内`,
+  low:'期内最低',dd52:'距 52 周高点',lastZone:'上次进恐慌区',lastNow:'当前就在恐慌区',
+  lastNever:'期内从未进过恐慌区',close:'收盘',daysAgo:n=>`${n} 天前`,
+  priceLog:'价格 · 对数',live:'实时',
+  foot:['颜色只表示一件事：这个市场现在在它自己的历史里有多便宜。绿=罕见的便宜，红=罕见的贵。跟涨跌无关。',
+   '比特币价格每 30 秒刷新。其余标的没有可直接调用的实时行情，显示最近一个交易日收盘价。',
+   '<b>分位一律按收盘价计算，不随盘中价格变动。</b>五个指标和连续天数判定都建立在收盘价上。',
+   '纵轴用平方根刻度，四条档位线才拉得开。价格轴取对数。指数按本币计价，未做汇率换算。',
+   '贪婪四档（1–4 级贪婪）<b>不是系统信号</b>——系统没有任何卖出逻辑。这四档已经用16个标的的全历史回测验证过：对长牛资产机械卖出的收益和风险调整后收益都显著跑输单纯持有，只有原油期货（CL=F）通过事件研究和全策略模拟的双重验证是例外，详见验证报告。阈值也不是恐慌档的镜像：纵轴刻意把恐慌端拉开了，镜像过去四条线会叠在一起。',
+   '右侧徽章直接对应系统的四级恐慌档，百分比是该档要投的配额。但它只回答「当前读数落在哪一档」——<b>真正触发还要同时满足连续天数、BTC 的 AHR999 门槛，以及 30 日窗口和总量闸门</b>。系统没有卖出逻辑，所以没有卖出档，高位的「贵」由颜色表达。',
+   '刷新数据：<code>python3 export_dashboard.py</code>，替换 <code>dashboard_data.json</code>。'],
+  copyright:'© 2026 一位比特国王 · 保留所有权利。本站界面设计、图表实现与指标算法为原创作品，未经许可不得复制或用于商业用途。'},
+ en:{brand:'One Bit King',h1:'Sixteen global markets<br>fear &amp; greed depth',
+  scaleLo:'Greener · more fear · cheaper',scaleHi:'Redder · more greed · pricier',
+  scaleLoCB:'Bluer · more fear · cheaper',scaleHiCB:'More orange · more greed · pricier',
+  dist:'Current spread',sortFear:'Sort by fear',sortOrig:'Original order',
+  greed:'Greed',fear:'Fear',pct:'pctile',copy:'Copy summary',copied:'Copied',noTier:'No action',deploy:'',
+  profTitle:'History — this asset’s own record',times:'×',lastAt:'last',
+  never:'never reached',atHigh:'usually near highs',nextAt:(k,p)=>`${k} ≈ ${p}`,
+  adviceHint:'Which tier the current reading falls in. Actual triggering also needs the consecutive-day rule, the AHR999 gate and the budget throttles.',
+  greedHint:'Greed tiers are sentiment reference, not a sell signal. Backtesting shows mechanically selling long-bull assets significantly underperforms holding — see the validation report.',
+  clfNote:'This asset’s three greed tiers passed double verification (event study + full-strategy simulation + ±5 threshold robustness) — see the validation report.',
+  cbOn:'Colorblind',cbOff:'Standard',
+  demo:'Showing sample data. Put dashboard_data.json in the same folder and open via a local server.',
+  stale:(d,n)=>`Data stops at ${d}, ${n} days stale. Re-run export_dashboard.py.`,
+  inZone:(t,n,names,dn,dv)=>`<b>${n}</b> of ${t} assets are in a fear zone: ${names}. Most fearful is <b>${dn}</b> at <b>${dv}</b>.`,
+  noZone:(t,dn,dv,gap,l1)=>`None of the ${t} assets are in a fear zone. Closest is <b>${dn}</b> at <b>${dv}</b>, <b>${gap}</b> above ${l1}.`,
+  gapTo:(k,g)=>`<b>${g}</b> above ${k}`,already:k=>`In <b>${k}</b>`,
+  low:'Period low',dd52:'From 52w high',lastZone:'Last in fear zone',lastNow:'In fear zone now',
+  lastNever:'Never in fear zone',close:'Close',daysAgo:n=>`${n}d ago`,
+  priceLog:'Price · log',live:'live',
+  foot:['Colour says one thing: how cheap this market is relative to its own history. Green = rarely this cheap, red = rarely this expensive. Not about up or down.',
+   'Bitcoin price refreshes every 30s. The others have no directly callable live feed, so the last close is shown.',
+   '<b>Percentiles always use closing prices</b> — the five indicators and the consecutive-day rules are all built on closes.',
+   'Vertical axis is square-root scaled so the four tier lines separate. Price axis is logarithmic. Indices are in local currency, not FX-converted.',
+   'The four greed levels are <b>not system signals</b> — the system has no sell logic. They have been backtested across all 16 assets’ full history: mechanically selling long-bull assets significantly underperforms simply holding, on both return and risk-adjusted return, with the sole exception of crude oil (CL=F), which passed double verification via event study and full-strategy simulation — see the validation report.',
+   'The badge maps directly to the four system fear levels; the percentage is that tier’s allocation. It only answers which tier the current reading falls in — <b>actual triggering also requires the consecutive-day rule, the AHR999 gate, and the window and total budget throttles</b>. The system has no sell logic, so there are no sell tiers; expensive readings are conveyed by colour alone.',
+   'Refresh: <code>python3 export_dashboard.py</code>, then replace <code>dashboard_data.json</code>.'],
+  copyright:'© 2026 One Bit King · All rights reserved. The interface design, chart implementation and indicator methodology are original works.'}
+};
+let LANG = (navigator.language||'zh').toLowerCase().startsWith('zh') ? 'zh' : 'en';
+const T=()=>I18N[LANG];
+const nameOf=a => LANG==='en' ? (NAME_EN[a.symbol]||a.name) : a.name;
+const tierName=t => LANG==='en' ? (TIER_EN[t.name]||t.name) : t.name;
+
+/* ================= 主题与色带 ================= */
+let THEME = 'light';   // 首次打开固定浅色，深色由右上角按钮切换
+let CB = false;
+const RAMPS={
+ light:{normal:[[0,'#05341F'],[12,'#0B4A30'],[25,'#17603C'],[40,'#42642C'],
+                [52,'#6E5713'],[65,'#7E4315'],[80,'#7C2C1D'],[100,'#5E1019']],
+        cb:[[0,'#0A2E55'],[12,'#123F6D'],[25,'#1C5480'],[40,'#3F5C74'],
+            [52,'#6B5836'],[65,'#835114'],[80,'#7A3C0C'],[100,'#5E2404']]},
+ dark:{normal:[[0,'#2FE58C'],[12,'#45E195'],[25,'#63DC8C'],[40,'#9AD466'],
+               [52,'#E6C63F'],[65,'#F5A048'],[80,'#FF7458'],[100,'#FF5468']],
+       cb:[[0,'#4FB6FF'],[12,'#69C4FF'],[25,'#86CDF8'],[40,'#AEC6D8'],
+           [52,'#DCC178'],[65,'#FFB047'],[80,'#FF9A2E'],[100,'#FF8A12']]}
+};
+const ramp=()=>RAMPS[THEME][CB?'cb':'normal'];
+const hex2rgb=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
+function heat(v){
+  const R=ramp();v=Math.max(0,Math.min(100,v));
+  for(let i=1;i<R.length;i++){
+    if(v<=R[i][0]){
+      const [v0,c0]=R[i-1],[v1,c1]=R[i];
+      const t=(v-v0)/(v1-v0),a=hex2rgb(c0),b=hex2rgb(c1);
+      return `rgb(${a.map((x,k)=>Math.round(x+(b[k]-x)*t)).join(',')})`;
+    }
+  }
+  return R[R.length-1][1];
 }
 
-/* ---------- 示例数据 ---------- */
+/* 档位显示名：L1 最浅、L4 最深，数字越大越恐慌 */
+const LVL={L1:'1',L2:'2',L3:'3',L4:'4'};
+const lvlShort=k=>LANG==='en'?`F${LVL[k]}`:`${LVL[k]}级`;
+const lvlFull =k=>LANG==='en'?`Fear ${LVL[k]}`:`${LVL[k]}级恐慌`;
+
+/* 贪婪档：系统没有卖出逻辑，这四档纯属参考，不产生任何信号。
+   阈值没有做成恐慌档的严格镜像（≥82/92/95/98）——纵轴是平方根刻度，
+   刻意把恐慌端拉开了，镜像过来四条线会挤在 22 个单位内、标签叠住。
+   改这里的 min 即可。                                        */
+const GREED=[{key:'G1',min:65},{key:'G2',min:78},{key:'G3',min:88},{key:'G4',min:95}];
+const GLVL={G1:'1',G2:'2',G3:'3',G4:'4'};
+const greedOf=v=>[...GREED].reverse().find(g=>v>=g.min)||null;
+const gShort=k=>LANG==='en'?`G${GLVL[k]}`:`${GLVL[k]}级`;
+const gFull =k=>LANG==='en'?`Greed ${GLVL[k]}`:`${GLVL[k]}级贪婪`;
+const GC2={G1:'--g1',G2:'--g2',G3:'--g3',G4:'--g4'};
+
+/* ================= 操作建议 =================
+   直接绑定系统的 L1–L4，不再自己切分位。五个状态刚好对应五档：
+   L4 重仓 / L3 加码 / L2 建仓 / L1 观察 / 未入档。
+   徽章上的百分比取自 config.yaml 的 tier_ratio，就是该档要投多少配额。
+
+   注意徽章只回答"当前读数落在哪一档"。真正触发还要同时满足
+   连续天数、BTC 的 AHR999 门槛、以及 30 日窗口和总量闸门。
+   系统没有卖出逻辑，所以这里也没有卖出档——高位的"贵"由颜色表达。  */
+const ADVICE={
+  L4:{zh:'强烈买入',en:'Strong Buy'},
+  L3:{zh:'买入',    en:'Buy'},
+  L2:{zh:'部分买入',en:'Partial Buy'},
+  L1:{zh:'观察',    en:'Watch'},
+  none:{zh:'不操作',en:'No action'},
+};
+const adviceOf=z=>ADVICE[z?z.key:'none']||ADVICE.none;
+
+/* ================= 资产标记 ================= */
+const CODE={'BTC-USD':'BTC','GC=F':'GOLD','CL=F':'OIL','^GSPC':'SPX','^STOXX50E':'SX5E',
+  '^NSEI':'NFTY','^N225':'N225','^HSI':'HSI','000001.SS':'SSE','AAPL':'AAPL','MSFT':'MSFT',
+  'GOOGL':'GOOG','NVDA':'NVDA','AMZN':'AMZN','TSLA':'TSLA','TSM':'TSM'};
+const shortCode=s=>CODE[s]||s.replace(/[^A-Za-z0-9]/g,'').slice(0,4).toUpperCase();
+const anchor=s=>'a-'+s.replace(/[^A-Za-z0-9]/g,'');
+
+/* ================= 实时价 ================= */
+const LIVE={'BTC-USD':'BTC'};
+const timers=[],liveTicks=[];
+async function fetchLive(code){
+  const r=await fetch(`https://api.coinbase.com/v2/prices/${code}-USD/spot`,{cache:'no-store'});
+  if(!r.ok)throw 0;
+  const p=Number((await r.json())?.data?.amount);
+  if(!isFinite(p)||p<=0)throw 0;
+  return p;
+}
+function startLive(symbol,node,currency){
+  const code=LIVE[symbol];if(!code||!node)return;
+  const tick=async()=>{
+    try{node.innerHTML=`${money(await fetchLive(code),currency)}<em>${currency}</em>
+      <span class="live"><i></i>${T().live}</span>`;}catch{}
+  };
+  tick();timers.push(setInterval(tick,30000));liveTicks.push(tick);
+}
+
+/* ================= 派生指标 ================= */
+function drawdown52(series){
+  const last=series[series.length-1];
+  if(last.p==null)return null;
+  const cut=new Date(last.d);cut.setDate(cut.getDate()-365);
+  let hi=0;
+  for(let i=series.length-1;i>=0;i--){
+    if(new Date(series[i].d)<cut)break;
+    if(series[i].p!=null&&series[i].p>hi)hi=series[i].p;
+  }
+  return hi?(last.p/hi-1)*100:null;
+}
+function lastInZone(series,l1){
+  for(let i=series.length-1;i>=0;i--){
+    if(series[i].v<=l1){
+      if(i===series.length-1)return {now:true};
+      return {date:series[i].d,
+        days:Math.round((new Date(series[series.length-1].d)-new Date(series[i].d))/864e5)};
+    }
+  }
+  return null;
+}
+
+/* ================= 示例数据 ================= */
 function demo(){
-  const defs=[
-    ['BTC-USD','比特币','USD',59.9,68400,''],['GC=F','黄金期货','USD',43.6,2410,'前月连续合约，换月日有价格跳空'],
+  const defs=[['BTC-USD','比特币','USD',59.9,68400,''],['GC=F','黄金期货','USD',43.6,2410,'前月连续合约，换月日有价格跳空'],
     ['CL=F','原油期货','USD',25.0,71.4,'前月连续合约，换月日有价格跳空'],['^GSPC','标普500','USD',56.9,5630,''],
     ['^STOXX50E','欧洲斯托克50','EUR',77.1,4980,''],['^NSEI','印度Nifty50','INR',37.8,24100,''],
     ['^N225','日经225','JPY',37.3,38200,''],['^HSI','恒生指数','HKD',67.8,17600,''],
-    ['000001.SS','上证指数','CNY',44.0,2890,''],['AAPL','苹果','USD',35.4,224],
-    ['MSFT','微软','USD',37.8,417],['GOOGL','谷歌','USD',13.3,163],
-    ['NVDA','英伟达','USD',41.9,118],['AMZN','亚马逊','USD',28.9,178],
-    ['TSLA','特斯拉','USD',19.3,216],['TSM','台积电','USD',16.2,168]
-  ];
-  let s=20260820;const r=()=>{s=(s*1664525+1013904223)%4294967296;return s/4294967296;};
+    ['000001.SS','上证指数','CNY',44.0,2890,''],['AAPL','苹果','USD',35.4,224,''],
+    ['MSFT','微软','USD',37.8,417,''],['GOOGL','谷歌','USD',13.3,163,''],
+    ['NVDA','英伟达','USD',41.9,118,''],['AMZN','亚马逊','USD',28.9,178,''],
+    ['TSLA','特斯拉','USD',19.3,216,''],['TSM','台积电','USD',16.2,168,'']];
+  let s=20260821;const r=()=>{s=(s*1664525+1013904223)%4294967296;return s/4294967296;};
   const end=new Date('2026-08-20');
-  return {demo:true,generated_at:'2026-08-20T09:00:00',years:10,
-    tiers:[{key:'L1',name:'观察',max:20},{key:'L2',name:'建仓',max:10},
-           {key:'L3',name:'加码',max:5},{key:'L4',name:'重仓',max:2}],
-    greed_tiers:[{key:'G1',name:'1级贪婪',threshold:65},{key:'G2',name:'2级贪婪',threshold:78},
-           {key:'G3',name:'3级贪婪',threshold:88},{key:'G4',name:'4级贪婪',threshold:95}],
+  return {demo:true,generated_at:'2026-08-21T09:00:00',years:10,budget:2000,
+    tiers:[{key:'L1',name:'观察',max:18,ratio:0},{key:'L2',name:'建仓',max:8,ratio:.2},
+           {key:'L3',name:'加码',max:5,ratio:.3},{key:'L4',name:'重仓',max:2,ratio:.5}],
     assets:defs.map(([symbol,name,currency,fv,px,note])=>{
-      const N=760,series=[];let v=48+r()*24,p=px*(0.35+r()*0.4);
+      const N=740,series=[];let v=48+r()*24,p=px*(0.4+r()*0.4);
       for(let i=0;i<N;i++){
-        v=Math.max(.4,Math.min(99.6,v+(50-v)*.013+(r()-.5)*7));
-        p*=1+(r()-.5)*.045;
+        v=Math.max(.4,Math.min(99.6,v+(50-v)*.013+(r()-.5)*7));p*=1+(r()-.5)*.045;
         const w=Math.pow(i/(N-1),2.4);
         const d=new Date(end);d.setDate(d.getDate()-(N-1-i));
         if(d.getDay()%6===0)continue;
-        series.push({d:d.toISOString().slice(0,10),
-          v:Math.round((v*(1-w)+fv*w)*100)/100,
+        series.push({d:d.toISOString().slice(0,10),v:Math.round((v*(1-w)+fv*w)*100)/100,
           p:Math.round((p*(1-w)+px*w)*10000)/10000});
       }
       const lo=series.reduce((a,b)=>b.v<a.v?b:a),last=series[series.length-1];
-      return {symbol,name,currency,tradeable:'',note:note||'',
-        tier:fv<=2?'L4':fv<=5?'L3':fv<=10?'L2':fv<=20?'L1':null,
-        latest:{date:last.d,value:last.v,price:last.p},
-        low:{date:lo.d,value:lo.v},series,
-        greed_touches:{G1:{count:Math.round(8+r()*30),last:null},G2:{count:Math.round(6+r()*24),last:null},
-          G3:{count:Math.round(4+r()*16),last:null},G4:{count:Math.round(r()*8),last:null}},
-        greed_note:symbol==='CL=F'?'该标的贪婪三档经回测双重验证（事件研究 + 全策略模拟 + 阈值±5稳健性），详见验证报告':''};
+      // 示例画像：真实数据由 export_dashboard.py 用全量历史算出
+      const hi52=Math.max(...series.slice(-252).map(x=>x.p));
+      const prof={};
+      [['L1',18,-14],['L2',8,-26],['L3',5,-34],['L4',2,-45],
+       ['G1',65,-2],['G2',78,-1],['G3',88,0],['G4',95,0]].forEach(([k,th,dd],j)=>{
+        const hit=series.filter(x=>k[0]==='L'?x.v<=th:x.v>=th);
+        if(hit.length)prof[k]={episodes:Math.max(1,Math.round(hit.length/40)),
+          days:hit.length,last:hit[hit.length-1].d,dd};
+      });
+      return {symbol,name,currency,tradeable:'',note,weight:1/16,
+        greed_confirmed:symbol==='CL=F',
+        profile:prof,hi52,latest:{date:last.d,value:last.v,price:last.p},
+        low:{date:lo.d,value:lo.v},series};
     })};
 }
 
-/* ---------- 顶部分布 ---------- */
-function ribbon(data){
+/* 标签防重叠：线画在真实位置，只把文字沿 y 推开。
+   dir=-1 向上推（贪婪端，锚定最下面那个），dir=1 向下推（恐慌端，锚定最上面那个）。 */
+function spread(ys,minGap,dir){
+  const idx=ys.map((y,i)=>[y,i]).sort((a,b)=>dir>0?a[0]-b[0]:b[0]-a[0]);
+  const out=new Array(ys.length);
+  let last=null;
+  for(const [y,i] of idx){
+    let ny=y;
+    if(last!==null && Math.abs(ny-last)<minGap) ny=last+dir*minGap;
+    out[i]=ny;last=ny;
+  }
+  return out;
+}
+
+/* ================= 分布图 ================= */
+function ribbon(d,list){
   const svg=$('#ribbon');svg.innerHTML='';
-  const W=1000,H=250,L=16,R=132,T=34,B=40;
-  const x=v=>L+SQ(v)/10*(W-L-R);
-  const bands=data.tiers.filter(t=>t.max!=null).sort((a,b)=>a.max-b.max);
+  const W=1000,H=600,L=66,R=112,T0=40,BASE=452;
+  const Y=v=>BASE-SQ(v)/10*(BASE-T0);
+  const defs=el('defs');
+  const lg=el('linearGradient',{id:'heatbg',x1:0,y1:0,x2:0,y2:1});
+  [...ramp()].reverse().forEach(([v,c])=>
+    lg.appendChild(el('stop',{offset:`${100-v}%`,'stop-color':c,'stop-opacity':.14})));
+  defs.appendChild(lg);svg.appendChild(defs);
+  svg.appendChild(el('rect',{x:L,y:T0,width:W-L-R,height:BASE-T0,fill:'url(#heatbg)'}));
 
-  let prev=0;
-  for(const t of bands){
-    svg.appendChild(el('rect',{x:x(prev),y:T,width:x(t.max)-x(prev),height:H-T-B,
-      fill:V(ZC[t.key]),opacity:.15}));
-    prev=t.max;
-  }
-  for(const t of bands){
-    svg.appendChild(el('line',{x1:x(t.max),y1:T-9,x2:x(t.max),y2:H-B,
-      stroke:V(ZC[t.key]),'stroke-width':1,opacity:.55}));
-    const lb=el('text',{x:x(t.max),y:T-15,fill:V(ZC[t.key]),'font-family':V('--mono'),
-      'font-size':10.5,'text-anchor':'middle','letter-spacing':'.08em'});
-    lb.textContent=t.key;svg.appendChild(lb);
-  }
-  svg.appendChild(el('line',{x1:L,y1:H-B,x2:W-R,y2:H-B,stroke:V('--edge'),'stroke-width':1}));
-  [0,5,20,50,100].forEach(v=>{
-    const t=el('text',{x:x(v),y:H-B+17,fill:V('--dusk'),'font-family':V('--mono'),
-      'font-size':10,'text-anchor':'middle'});t.textContent=v;svg.appendChild(t);
+  const bands=d.tiers.filter(t=>t.max!=null).sort((a,b)=>a.max-b.max);
+  const fy=spread(bands.map(t=>Y(t.max)),19,1);
+  bands.forEach((t,i)=>{
+    svg.appendChild(el('line',{x1:L,y1:Y(t.max),x2:W-R+8,y2:Y(t.max),
+      stroke:V(ZC[t.key]),'stroke-width':2,opacity:.85,'stroke-dasharray':'7 5'}));
+    if(Math.abs(fy[i]-Y(t.max))>2)
+      svg.appendChild(el('line',{x1:W-R+8,y1:Y(t.max),x2:W-R+14,y2:fy[i],
+        stroke:V(ZC[t.key]),'stroke-width':1,opacity:.5}));
+    const lb=el('text',{x:W-R+18,y:fy[i]+6,fill:V(ZC[t.key]),'font-family':V('--mono'),
+      'font-size':16,'font-weight':700});
+    lb.textContent=`${lvlShort(t.key)} ${t.max}`;svg.appendChild(lb);
   });
-  const cap=el('text',{x:L,y:H-B+33,fill:V('--dusk'),'font-family':V('--mono'),'font-size':10});
-  cap.textContent='恐慌 ←　情绪分位　→ 贪婪';svg.appendChild(cap);
+  const gy=spread(GREED.map(g=>Y(g.min)),19,-1);
+  GREED.forEach((g,i)=>{
+    svg.appendChild(el('line',{x1:L,y1:Y(g.min),x2:W-R+8,y2:Y(g.min),
+      stroke:V(GC2[g.key]),'stroke-width':2,opacity:.75,'stroke-dasharray':'2 6'}));
+    // 文字被推开时用一小段引线连回真实位置
+    if(Math.abs(gy[i]-Y(g.min))>2)
+      svg.appendChild(el('line',{x1:W-R+8,y1:Y(g.min),x2:W-R+14,y2:gy[i],
+        stroke:V(GC2[g.key]),'stroke-width':1,opacity:.5}));
+    const lb=el('text',{x:W-R+18,y:gy[i]+6,fill:V(GC2[g.key]),'font-family':V('--mono'),
+      'font-size':16,'font-weight':700});
+    lb.textContent=`${gShort(g.key)} ${g.min}`;svg.appendChild(lb);
+  });
+  svg.appendChild(el('line',{x1:L,y1:T0,x2:L,y2:BASE,stroke:V('--rule'),'stroke-width':2}));
+  [0,5,20,50,100].forEach(v=>{
+    const t=el('text',{x:L-14,y:Y(v)+6,fill:V('--ink3'),'font-family':V('--mono'),
+      'font-size':15,'text-anchor':'end'});
+    t.textContent=v;svg.appendChild(t);
+  });
+  const up=el('text',{x:L-14,y:T0-16,fill:heat(100),'font-family':V('--ui'),
+    'font-size':15,'font-weight':600,'text-anchor':'end'});
+  up.textContent=T().greed;svg.appendChild(up);
+  const dn=el('text',{x:L-14,y:BASE+24,fill:heat(0),'font-family':V('--ui'),
+    'font-size':15,'font-weight':600,'text-anchor':'end'});
+  dn.textContent=T().fear;svg.appendChild(dn);
 
-  const sorted=[...data.assets].sort((a,b)=>a.latest.value-b.latest.value);
-  const lanes=6,lh=(H-T-B-14)/lanes;
-  sorted.forEach((a,i)=>{
-    const cx=x(a.latest.value),cy=T+9+lh*(i%lanes)+lh/2;
-    const z=zoneOf(a.latest.value,data.tiers);
-    const c=z?V(ZC[z.key]):V('--ash');
+  const slot=(W-L-R)/list.length;
+  list.forEach((a,i)=>{
+    const cx=L+slot*(i+.5),cy=Y(a.latest.value);
+    const z=zoneOf(a.latest.value,d.tiers),c=heat(a.latest.value);
     const g=el('g',{});
-    if(z)g.appendChild(el('circle',{cx,cy,r:9,fill:'none',stroke:c,'stroke-width':1,opacity:.4}));
-    g.appendChild(el('circle',{cx,cy,r:z?4.5:3,fill:c,opacity:z?1:.6}));
-    const t=el('text',{x:cx+13,y:cy+4,fill:z?c:V('--ash'),'font-family':V('--mono'),'font-size':10.5});
-    t.textContent=a.symbol;g.appendChild(t);
+    g.appendChild(el('line',{x1:cx,y1:cy,x2:cx,y2:BASE,stroke:c,
+      'stroke-width':z?3:1.6,opacity:z?.5:.26}));
+    if(z)g.appendChild(el('circle',{cx,cy,r:13,fill:'none',stroke:c,'stroke-width':2,opacity:.45}));
+    g.appendChild(el('circle',{cx,cy,r:z?8:6,fill:c}));
+    const val=el('text',{x:cx,y:cy-21,fill:c,'font-family':V('--mono'),
+      'font-size':15,'font-weight':700,'text-anchor':'middle'});
+    val.textContent=fmt(a.latest.value);g.appendChild(val);
+    const link=el('a',{href:'#'+anchor(a.symbol)});
+    const lab=el('text',{x:cx,y:BASE+20,fill:c,'font-family':V('--ui'),
+      'font-size':17,'font-weight':z?700:500,'text-anchor':'end',
+      transform:`rotate(-52 ${cx} ${BASE+20})`});
+    lab.textContent=nameOf(a);link.appendChild(lab);g.appendChild(link);
     svg.appendChild(g);
   });
 
-  const lg=$('#legend');lg.innerHTML='';
-  const cnt={};
-  data.assets.forEach(a=>{const z=zoneOf(a.latest.value,data.tiers);cnt[z?z.key:'-']=(cnt[z?z.key:'-']||0)+1;});
-  [...bands].reverse().forEach(t=>{
-    if(!cnt[t.key])return;
-    const s=document.createElement('span');
-    s.innerHTML=`<i style="background:${V(ZC[t.key])}"></i>${t.key} ${t.name} ${cnt[t.key]}`;
-    lg.appendChild(s);
-  });
-  const s=document.createElement('span');
-  s.innerHTML=`<i style="background:${V('--ash')}"></i>未入区 ${cnt['-']||0}`;
-  lg.appendChild(s);
+  const sorted=[...d.assets].sort((a,b)=>a.latest.value-b.latest.value);
+  const inZ=sorted.filter(a=>zoneOf(a.latest.value,d.tiers));
+  const dp=sorted[0],l1=bands[bands.length-1].max;
+  $('#summary').innerHTML = inZ.length
+    ? T().inZone(d.assets.length,inZ.length,inZ.map(nameOf).join(LANG==='en'?', ':'、'),nameOf(dp),fmt(dp.latest.value))
+    : T().noZone(d.assets.length,nameOf(dp),fmt(dp.latest.value),fmt(l1-dp.latest.value),lvlFull(bands[bands.length-1].key));
 }
 
-/* ---------- 贪婪档参考 ---------- */
-function greedLegend(tiers){
-  const lg=$('#greed-legend');lg.innerHTML='';
-  tiers.forEach(t=>{
-    const s=document.createElement('span');
-    s.innerHTML=`<i style="background:${V(GZC[t.key])}"></i>${t.key} ${t.name} ≥${t.threshold}`;
-    lg.appendChild(s);
+/* 每档的历史画像：全部来自这个标的自己的数据。
+   dd 是触及该档时「距前 252 日最高价」的中位数回撤，
+   把抽象的分位读数翻译回一个能看懂的价位。          */
+function profileRows(a,tiers){
+  const pf=a.profile||{}, hi=a.hi52;
+  const rows=[];
+  [...tiers].filter(t=>t.max!=null).sort((x,y)=>y.max-x.max).forEach(t=>{
+    const p=pf[t.key];
+    rows.push({key:t.key,label:lvlFull(t.key),color:V(ZC[t.key]),p,
+      est:(p&&hi&&p.dd!=null)?hi*(1+p.dd/100):null});
   });
+  [...GREED].forEach(g=>{
+    const p=pf[g.key];
+    rows.push({key:g.key,label:gFull(g.key),color:V(GC2[g.key]),p,est:null,greed:true});
+  });
+  return rows;
 }
 
-/* ---------- 单个资产：价格在上，深度在下，共用 x 轴 ---------- */
-function panel(a,tiers,greedTiers,idx){
-  const z=zoneOf(a.latest.value,tiers);
-  const col=z?V(ZC[z.key]):V('--ash');
-  const n=a.series.length;
+/* ================= 资产卡 ================= */
+function panel(a,tiers,idx){
+  const z=zoneOf(a.latest.value,tiers),c=heat(a.latest.value),n=a.series.length;
+  const bands=tiers.filter(t=>t.max!=null).sort((x,y)=>y.max-x.max);
+  const l1=bands[0].max;
+  const next=bands.find(t=>a.latest.value>t.max);
+  const seen=lastInZone(a.series,l1), dd=drawdown52(a.series);
+  const gd=z?null:greedOf(a.latest.value);
+  // 下一档在历史上对应的典型价位，把分位翻译成看得懂的数字
+  const np=next&&a.profile?a.profile[next.key]:null;
+  const nextEst=(np&&a.hi52&&np.dd!=null)?money(a.hi52*(1+np.dd/100),a.currency):null;
+  // 预算在 config.yaml 里，导出时带过来才能算出实际金额
+  const amt=(z&&DATA.budget&&a.weight)
+    ? '$'+Math.round(DATA.budget*a.weight*(z.ratio||0)).toLocaleString('en-US') : '';
 
-  const gt=a.greed_touches;
-  const greedStr=gt&&greedTiers?greedTiers.map(t=>`${t.key}×${gt[t.key]?gt[t.key].count:0}`).join(' · '):'';
-
-  const box=document.createElement('div');box.className='panel';
+  const box=document.createElement('div');
+  box.className='panel';box.id=anchor(a.symbol);box.style.borderLeftColor=c;
   box.innerHTML=`
-    <div class="panel-top">
+    <div class="ptop">
       <div>
-        <p class="p-sym">${a.symbol}</p>
-        <h3 class="p-name">${a.name}</h3>
-        <p class="p-px">${money(a.latest.price,a.currency)}<em>${a.currency}</em></p>
+        <p class="psym">${a.symbol}</p>
+        <h3 class="pname">${nameOf(a)}</h3>
+        <p class="pprice" id="px-${idx}">${money(a.latest.price,a.currency)}<em>${a.currency}</em></p>
       </div>
-      <div class="p-right">
-        <div class="p-pct">
-          <b style="color:${col}">${fmt(a.latest.value)}</b>
-          <span>分位</span>
+      <div class="pright">
+        <div class="ppct"><b style="color:${c}">${fmt(a.latest.value)}</b><span>${T().pct}</span></div>
+        <div class="disc" style="background:${c}" title="${gd?T().greedHint:T().adviceHint}">
+          <span class="act">${z?lvlFull(z.key):(gd?gFull(gd.key):T().noTier)}</span>
+          ${z?`<span class="st">${T().deploy}${((z.ratio||0)*100).toFixed(0)}%${amt?' · '+amt:''}</span>`:''}
         </div>
-        <div class="bitbox${z?' on':''}" title="${z?'已进入 '+z.key+' '+z.name:'未进入任何档位'}">${z?'1':'0'}</div>
       </div>
     </div>
-    <div class="p-meta">
-      <span>期内最低 <u>${fmt(a.low.value)}</u> · ${a.low.date}</span>
-      ${a.tier?`<span>已解锁 <u>${a.tier}</u></span>`:''}
-      ${a.tradeable?`<span>可买 <u>${a.tradeable}</u></span>`:''}
-      ${greedStr?`<span>贪婪触及 <u>${greedStr}</u></span>`:''}
+    <div class="pmeta">
+      <span>${next?T().gapTo(lvlFull(next.key),fmt(a.latest.value-next.max)):T().already(lvlFull(z.key))}</span>
+      ${nextEst?`<span>${T().nextAt(lvlFull(next.key),nextEst)}</span>`:''}
+      ${dd!=null?`<span>${T().dd52} <b>${dd.toFixed(1)}%</b></span>`:''}
+      <span>${T().low} <b>${fmt(a.low.value)}</b> · ${a.low.date}</span>
+      <span>${seen?(seen.now?T().lastNow:`${T().lastZone} <b>${seen.date}</b> · ${T().daysAgo(seen.days)}`):T().lastNever}</span>
+      <span>${T().close} <b>${a.latest.date}</b></span>
     </div>`;
 
-  const chart=document.createElement('div');chart.className='p-chart';
-  const W=880,PH=74,GAP=8,FH=176,H=PH+GAP+FH+22,PL=6,PR=50;
-  const svg=el('svg',{viewBox:`0 0 ${W} ${H}`,role:'img','aria-label':`${a.name} 价格与恐慌分位`});
+  const chart=document.createElement('div');chart.className='pchart';
+  const W=880,PH=96,GAP=12,FH=260,H=PH+GAP+FH+34,PL=8,PR=76;
+  const svg=el('svg',{viewBox:`0 0 ${W} ${H}`,role:'img'});
   const X=i=>PL+i/(n-1)*(W-PL-PR);
 
-  /* 价格：对数刻度 */
   const px=a.series.map(s=>s.p).filter(v=>v!=null&&v>0);
   if(px.length>1){
     const lo=Math.log(Math.min(...px)),hi=Math.log(Math.max(...px)),sp=hi-lo||1;
-    const PY=v=>4+(1-(Math.log(v)-lo)/sp)*(PH-8);
-    let d='',open=false;
+    const PY=v=>6+(1-(Math.log(v)-lo)/sp)*(PH-12);
+    let dd2='',open=false;
     a.series.forEach((s,i)=>{
       if(s.p==null||s.p<=0){open=false;return;}
-      d+=(open?'L':'M')+X(i).toFixed(1)+','+PY(s.p).toFixed(1);open=true;
+      dd2+=(open?'L':'M')+X(i).toFixed(1)+','+PY(s.p).toFixed(1);open=true;
     });
-    svg.appendChild(el('path',{d,fill:'none',stroke:V('--quartz'),'stroke-width':1.2,
-      'stroke-linejoin':'round','vector-effect':'non-scaling-stroke',opacity:.85}));
-    [Math.max(...px),Math.min(...px)].forEach((v,k)=>{
-      const t=el('text',{x:W-PR+7,y:PY(v)+3.5,fill:V('--dusk'),'font-family':V('--mono'),'font-size':9.5});
+    svg.appendChild(el('path',{d:dd2,fill:'none',stroke:V('--ink3'),'stroke-width':2,
+      'stroke-linejoin':'round','vector-effect':'non-scaling-stroke',opacity:.8}));
+    [Math.max(...px),Math.min(...px)].forEach(v=>{
+      const t=el('text',{x:W-PR+10,y:PY(v)+6,fill:V('--ink3'),'font-family':V('--mono'),'font-size':13.5});
       t.textContent=money(v,a.currency);svg.appendChild(t);
     });
-    const lab=el('text',{x:PL+2,y:11,fill:V('--quartz'),'font-family':V('--mono'),
-      'font-size':9,'letter-spacing':'.14em',opacity:.7});
-    lab.textContent='价格 · 对数';svg.appendChild(lab);
+    const lab=el('text',{x:PL+2,y:16,fill:V('--ink3'),'font-family':V('--ui'),
+      'font-size':13.5,'font-weight':600});
+    lab.textContent=T().priceLog;svg.appendChild(lab);
   }
+  svg.appendChild(el('line',{x1:PL,y1:PH+GAP/2,x2:W-PR,y2:PH+GAP/2,stroke:V('--rule'),'stroke-width':2}));
 
-  svg.appendChild(el('line',{x1:PL,y1:PH+GAP/2,x2:W-PR,y2:PH+GAP/2,
-    stroke:V('--edge'),'stroke-width':1}));
-
-  /* 深度：平方根刻度，0 在底部 */
-  const FT=PH+GAP,FB=H-22;
+  const FT=PH+GAP,FB=H-34;
   const Y=v=>FT+(1-SQ(v)/10)*(FB-FT);
-  const bands=tiers.filter(t=>t.max!=null).sort((b,c)=>c.max-b.max);
-  let lower=0;
-  [...bands].reverse().forEach(t=>{
-    svg.appendChild(el('rect',{x:PL,y:Y(t.max),width:W-PL-PR,height:Y(lower)-Y(t.max),
-      fill:V(ZC[t.key]),opacity:.12}));
-    lower=t.max;
-  });
-  bands.forEach(t=>{
+  const gid='hb'+idx;
+  const defs=el('defs');
+  const lgd=el('linearGradient',{id:gid,x1:0,y1:0,x2:0,y2:1});
+  [...ramp()].reverse().forEach(([v,col])=>
+    lgd.appendChild(el('stop',{offset:`${100-v}%`,'stop-color':col,'stop-opacity':.14})));
+  defs.appendChild(lgd);svg.appendChild(defs);
+  svg.appendChild(el('rect',{x:PL,y:FT,width:W-PL-PR,height:FB-FT,fill:`url(#${gid})`}));
+
+  const fy=spread(bands.map(t=>Y(t.max)),17,1);
+  bands.forEach((t,i)=>{
     svg.appendChild(el('line',{x1:PL,y1:Y(t.max),x2:W-PR,y2:Y(t.max),stroke:V(ZC[t.key]),
-      'stroke-width':1,opacity:.6,'stroke-dasharray':'3 3'}));
-    const lb=el('text',{x:W-PR+7,y:Y(t.max)+3.5,fill:V(ZC[t.key]),
-      'font-family':V('--mono'),'font-size':9.5});
-    lb.textContent=`${t.key} ${t.max}`;svg.appendChild(lb);
+      'stroke-width':2,opacity:.85,'stroke-dasharray':'6 5'}));
+    if(Math.abs(fy[i]-Y(t.max))>2)
+      svg.appendChild(el('line',{x1:W-PR,y1:Y(t.max),x2:W-PR+7,y2:fy[i],
+        stroke:V(ZC[t.key]),'stroke-width':1,opacity:.5}));
+    const lb=el('text',{x:W-PR+11,y:fy[i]+5,fill:V(ZC[t.key]),
+      'font-family':V('--mono'),'font-size':14.5,'font-weight':700});
+    lb.textContent=`${lvlShort(t.key)} ${t.max}`;svg.appendChild(lb);
   });
-  [50,100].forEach(v=>{
-    svg.appendChild(el('line',{x1:PL,y1:Y(v),x2:W-PR,y2:Y(v),stroke:V('--edge'),'stroke-width':1,opacity:.7}));
-    const lb=el('text',{x:W-PR+7,y:Y(v)+3.5,fill:V('--dusk'),'font-family':V('--mono'),'font-size':9.5});
+  const gy=spread(GREED.map(g=>Y(g.min)),17,-1);
+  GREED.forEach((g,i)=>{
+    svg.appendChild(el('line',{x1:PL,y1:Y(g.min),x2:W-PR,y2:Y(g.min),stroke:V(GC2[g.key]),
+      'stroke-width':2,opacity:.75,'stroke-dasharray':'2 6'}));
+    if(Math.abs(gy[i]-Y(g.min))>2)
+      svg.appendChild(el('line',{x1:W-PR,y1:Y(g.min),x2:W-PR+7,y2:gy[i],
+        stroke:V(GC2[g.key]),'stroke-width':1,opacity:.5}));
+    const lb=el('text',{x:W-PR+11,y:gy[i]+5,fill:V(GC2[g.key]),
+      'font-family':V('--mono'),'font-size':14.5,'font-weight':700});
+    lb.textContent=`${gShort(g.key)} ${g.min}`;svg.appendChild(lb);
+  });
+  [50].forEach(v=>{
+    const lb=el('text',{x:W-PR+10,y:Y(v)+6,fill:V('--ink3'),'font-family':V('--mono'),'font-size':13.5});
     lb.textContent=v;svg.appendChild(lb);
   });
 
-  // 注意：这条线不能用 non-scaling-stroke。它会让虚线间隔按屏幕像素算，
-  // 而 getTotalLength() 返回的是 viewBox 坐标长度，两者不一致会导致
-  // 绘制动画把曲线切成「画一段断一段」。
-  const line=el('polyline',{
-    points:a.series.map((s,i)=>`${X(i).toFixed(1)},${Y(s.v).toFixed(1)}`).join(' '),
-    fill:'none',stroke:V('--pearl'),'stroke-width':1.1,'stroke-linejoin':'round',
-    opacity:.9});
+  const line=el('polyline',{points:a.series.map((s,i)=>`${X(i).toFixed(1)},${Y(s.v).toFixed(1)}`).join(' '),
+    fill:'none',stroke:V('--ink'),'stroke-width':1.6,'stroke-linejoin':'round'});
   svg.appendChild(line);
-  svg.appendChild(el('circle',{cx:X(n-1),cy:Y(a.series[n-1].v),r:3,fill:col}));
+  svg.appendChild(el('circle',{cx:X(n-1),cy:Y(a.series[n-1].v),r:6,fill:c}));
 
   [0,Math.floor((n-1)/2),n-1].forEach((i,k)=>{
-    const t=el('text',{x:X(i),y:H-6,fill:V('--dusk'),'font-family':V('--mono'),'font-size':9.5,
+    const t=el('text',{x:X(i),y:H-8,fill:V('--ink3'),'font-family':V('--mono'),'font-size':13.5,
       'text-anchor':k===0?'start':k===2?'end':'middle'});
     t.textContent=a.series[i].d;svg.appendChild(t);
   });
 
-  const cross=el('line',{x1:0,y1:4,x2:0,y2:FB,stroke:V('--pearl'),'stroke-width':1,
+  const cross=el('line',{x1:0,y1:6,x2:0,y2:FB,stroke:V('--ink'),'stroke-width':1.5,
     opacity:0,'vector-effect':'non-scaling-stroke'});
   svg.appendChild(cross);
   const tip=document.createElement('div');tip.className='tip';
-
   const move=e=>{
     const r=svg.getBoundingClientRect();
-    const cx=e.touches?e.touches[0].clientX:e.clientX;
-    const i=Math.max(0,Math.min(n-1,Math.round(((cx-r.left)/r.width*W-PL)/(W-PL-PR)*(n-1))));
+    const cx0=e.touches?e.touches[0].clientX:e.clientX;
+    const i=Math.max(0,Math.min(n-1,Math.round(((cx0-r.left)/r.width*W-PL)/(W-PL-PR)*(n-1))));
     const s=a.series[i];
-    cross.setAttribute('x1',X(i));cross.setAttribute('x2',X(i));cross.setAttribute('opacity',.28);
-    tip.style.opacity=1;
-    tip.style.left=(X(i)/W*100)+'%';
-    tip.style.top=(Y(s.v)/H*100)+'%';
-    tip.innerHTML=`<b>分位 ${fmt(s.v)}</b><u>${money(s.p,a.currency)}</u><i>${s.d}</i>`;
+    cross.setAttribute('x1',X(i));cross.setAttribute('x2',X(i));cross.setAttribute('opacity',.4);
+    tip.style.opacity=1;tip.style.left=(X(i)/W*100)+'%';tip.style.top=(Y(s.v)/H*100)+'%';
+    tip.innerHTML=`${T().pct} ${fmt(s.v)}<u>${money(s.p,a.currency)}</u><i>${s.d}</i>`;
   };
   const out=()=>{cross.setAttribute('opacity',0);tip.style.opacity=0;};
   svg.addEventListener('mousemove',move);
@@ -458,48 +725,151 @@ function panel(a,tiers,greedTiers,idx){
   svg.addEventListener('touchmove',move,{passive:true});
   svg.addEventListener('touchend',out);
 
-  chart.appendChild(svg);chart.appendChild(tip);
-  box.appendChild(chart);
-  if(a.note){
-    const p=document.createElement('p');p.className='p-note';p.textContent=a.note;
-    box.appendChild(p);
+  chart.appendChild(svg);chart.appendChild(tip);box.appendChild(chart);
+  // 历史画像
+  const rows=profileRows(a,tiers);
+  if(rows.some(r=>r.p)){
+    const d=document.createElement('details');d.className='prof';
+    d.innerHTML=`<summary>${T().profTitle}</summary><table><tbody>${
+      rows.map(r=>{
+        if(!r.p)return `<tr><td class="k" style="color:${r.color}">${r.label}</td>`
+          +`<td class="miss" colspan="2">${T().never}</td></tr>`;
+        const mid=`${r.p.episodes} ${T().times} · ${T().lastAt} ${r.p.last}`;
+        const right=r.greed
+          ? `<span class="n">${T().atHigh}</span>`
+          : (r.est!=null?`<span class="est">${money(r.est,a.currency)}</span>`
+                         +`<span class="n"> · ${r.p.dd}%</span>`:'—');
+        return `<tr><td class="k" style="color:${r.color}">${r.label}</td>`
+          +`<td class="n">${mid}</td><td>${right}</td></tr>`;
+      }).join('')}</tbody></table>`;
+    box.appendChild(d);
   }
-  if(a.greed_note){
-    const p=document.createElement('p');p.className='p-note-greed';p.textContent=a.greed_note;
-    box.appendChild(p);
+
+  if(a.note&&LANG==='zh'){
+    const p=document.createElement('p');p.className='pnote';p.textContent=a.note;box.appendChild(p);
+  }
+  if(a.greed_confirmed){
+    const p=document.createElement('p');p.className='pnote-greed';p.textContent=T().clfNote;box.appendChild(p);
   }
   $('#panels').appendChild(box);
+  startLive(a.symbol,box.querySelector(`#px-${idx}`),a.currency);
 
   if(!REDUCED){
     const len=line.getTotalLength();
     line.style.strokeDasharray=len;line.style.strokeDashoffset=len;
     line.style.transition='stroke-dashoffset 1s cubic-bezier(.22,.8,.3,1)';
-    // 动画结束后清掉虚线图案，避免任何情况下残留的 dash 把曲线切断
     line.addEventListener('transitionend',()=>{line.style.strokeDasharray='none';},{once:true});
     setTimeout(()=>{line.style.strokeDashoffset=0;},50+idx*40);
   }
 }
 
-/* ---------- 渲染 ---------- */
-function render(d){
-  $('#demo-banner').hidden=!d.demo;
-  const on=d.assets.filter(a=>zoneOf(a.latest.value,d.tiers)).length;
-  const low=Math.min(...d.assets.map(a=>a.latest.value));
-  $('#c-on').textContent=on;
-  $('#c-on').style.color=on?V('--crown'):V('--dusk');
-  $('#c-total').textContent=d.assets.length;
-  $('#c-low').textContent=fmt(low);
-  $('#c-date').textContent=(d.assets[0]?.latest.date||d.generated_at||'').slice(5,10).replace('-','/');
-  ribbon(d);
-  if(d.greed_tiers)greedLegend(d.greed_tiers);
-  $('#panels').innerHTML='';
-  d.assets.forEach((a,i)=>panel(a,d.tiers,d.greed_tiers,i));
+/* ================= 吸顶导航 ================= */
+function buildNav(list,tiers){
+  const strip=$('#navstrip');strip.innerHTML='';
+  list.forEach(a=>{
+    const c=heat(a.latest.value);
+    const el2=document.createElement('a');
+    el2.className='chip';el2.href='#'+anchor(a.symbol);
+    el2.innerHTML=`<i style="background:${c}"></i>${shortCode(a.symbol)} ${fmt(a.latest.value)}`;
+    strip.appendChild(el2);
+  });
 }
+
+/* ================= 复制概览 ================= */
+function summaryText(){
+  const tiers=DATA.tiers;
+  const sorted=[...DATA.assets].sort((a,b)=>a.latest.value-b.latest.value);
+  const inZ=sorted.filter(a=>zoneOf(a.latest.value,tiers));
+  const head=LANG==='en'
+    ? `One Bit King · Fear & Greed Depth · ${DATA.assets[0]?.latest.date}`
+    : `一位比特国王 · 贪婪恐慌深度 · ${DATA.assets[0]?.latest.date}`;
+  const lines=sorted.slice(0,5).map(a=>{
+    const z=zoneOf(a.latest.value,tiers);
+    return `${nameOf(a)} ${fmt(a.latest.value)}${z?' '+z.key:''}`;
+  });
+  const tail=LANG==='en'
+    ? `${inZ.length}/${DATA.assets.length} in fear zone`
+    : `${DATA.assets.length} 个标的，${inZ.length} 个在恐慌区`;
+  return [head,tail,'',...lines].join('\n');
+}
+
+/* ================= 渲染 ================= */
+let DATA=null,byFear=true;   // 默认按恐慌程度排序
+const order=()=>byFear?[...DATA.assets].sort((a,b)=>a.latest.value-b.latest.value):DATA.assets;
+function draw(){
+  timers.splice(0).forEach(clearInterval);liveTicks.length=0;
+  const list=order();
+  ribbon(DATA,list);
+  buildNav(list,DATA.tiers);
+  $('#panels').innerHTML='';
+  list.forEach((a,i)=>panel(a,DATA.tiers,i));
+}
+function paintChrome(){
+  const t=T();
+  document.documentElement.lang = LANG==='zh'?'zh-CN':'en';
+  document.documentElement.dataset.theme = THEME;
+  $('#brandName').textContent=t.brand;
+  $('#h1').innerHTML=t.h1;
+  $('#distTitle').textContent=t.dist;
+  $('#sortBtn').textContent=byFear?t.sortOrig:t.sortFear;
+  $('#langBtn').textContent=LANG==='zh'?'EN':'中';
+  $('#themeBtn').textContent=THEME==='dark'?'☀':'☾';
+  $('#cbBtn').textContent=CB?t.cbOn:t.cbOff;
+  $('#cbBtn').classList.toggle('on',CB);
+  $('#copyBtn').textContent=t.copy;
+  const R=ramp();
+  $('#scaleBar').style.background=`linear-gradient(90deg,${R.map(([v,c])=>`${c} ${v}%`).join(',')})`;
+  $('#scaleLo').textContent=CB?t.scaleLoCB:t.scaleLo;
+  $('#scaleLo').style.color=heat(0);
+  $('#scaleHi').textContent=CB?t.scaleHiCB:t.scaleHi;
+  $('#scaleHi').style.color=heat(100);
+  $('#demoBanner').textContent=t.demo;
+  $('#footer').innerHTML=t.foot.map(p=>`<p>${p}</p>`).join('')
+    +`<p class="copyright">${t.copyright}</p>`;
+  if(DATA&&!DATA.demo){
+    const last=DATA.assets[0]?.latest.date;
+    const days=last?Math.floor((Date.now()-new Date(last+'T00:00:00'))/864e5):0;
+    $('#stale').hidden = days<=4;
+    if(days>4)$('#stale').textContent=t.stale(last,days);
+  }
+}
+function render(d){
+  DATA=d;
+  $('#demoBanner').hidden=!d.demo;
+  paintChrome();
+  draw();
+}
+
+$('#langBtn').onclick=()=>{LANG=LANG==='zh'?'en':'zh';paintChrome();draw();};
+$('#themeBtn').onclick=()=>{THEME=THEME==='dark'?'light':'dark';paintChrome();draw();};
+$('#cbBtn').onclick=()=>{CB=!CB;paintChrome();draw();};
+$('#sortBtn').onclick=()=>{byFear=!byFear;paintChrome();draw();};
+$('#copyBtn').onclick=async()=>{
+  const text=summaryText(), b=$('#copyBtn');
+  // iPhone/iPad 上直接调系统分享面板，比复制到剪贴板顺手
+  if(navigator.share){
+    try{ await navigator.share({title:T().brand,text}); return; }catch{ /* 用户取消就当没点 */ }
+  }
+  try{
+    await navigator.clipboard.writeText(text);
+    b.textContent=T().copied;
+    setTimeout(()=>{b.textContent=T().copy;},1600);
+  }catch{}
+};
+$('#top').onclick=()=>window.scrollTo({top:0,behavior:REDUCED?'auto':'smooth'});
+
+// iOS 会冻结后台标签页的定时器，切回来时手动补一次
+document.addEventListener('visibilitychange',()=>{
+  if(!document.hidden) liveTicks.forEach(f=>f());
+});
+addEventListener('scroll',()=>{
+  $('#top').classList.toggle('show',scrollY>600);
+  $('#navbar').classList.toggle('show',scrollY>420);
+},{passive:true});
 
 fetch('dashboard_data.json',{cache:'no-store'})
   .then(r=>{if(!r.ok)throw 0;return r.json();})
-  .then(render)
-  .catch(()=>render(demo()));
+  .then(render).catch(()=>render(demo()));
 </script>
 </body>
 </html>

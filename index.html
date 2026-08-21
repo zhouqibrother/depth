@@ -16,6 +16,7 @@
   --crown:#E6B450;                     /* 只给王冠与「一个比特」用 */
   --quartz:#7FE3D4;                    /* 价格线 */
   --l1:#3D5A8A; --l2:#C9932E; --l3:#D9622F; --l4:#D6335C;
+  --g1:#5B8A3D; --g2:#8FA83D; --g3:#C9A02E; --g4:#E6501E;   /* 贪婪档，跟恐慌档l1-l4区分色系 */
   --display:"Sora",-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
   --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
 }
@@ -67,6 +68,18 @@ h1 .bit{
 .legend{display:flex;gap:15px;font-family:var(--mono);font-size:11px;color:var(--ash);flex-wrap:wrap}
 .legend i{font-style:normal;width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:6px;vertical-align:1px}
 #ribbon{width:100%;height:auto;display:block}
+
+/* ---------- 贪婪档 ---------- */
+.greed-legend{display:flex;gap:15px;font-family:var(--mono);font-size:11px;color:var(--ash);flex-wrap:wrap;margin-bottom:16px}
+.greed-legend i{font-style:normal;width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:6px;vertical-align:1px}
+.greed-disclaimer{
+  margin:0;padding:13px 16px;background:rgba(201,160,46,.07);border:1px solid var(--g3);
+  border-radius:4px;font-size:12.5px;color:var(--ash);line-height:1.6;max-width:72ch;
+}
+.greed-disclaimer .en{display:block;margin-top:5px;color:var(--dusk);font-size:11.5px}
+.p-note-greed{
+  margin:0;padding:0 22px 16px;font-size:11.5px;color:var(--g3);line-height:1.5;max-width:70ch;
+}
 
 /* ---------- 资产面板 ---------- */
 .panels{padding:8px 0 40px}
@@ -168,6 +181,18 @@ footer code{font-family:var(--mono);font-size:11.5px;color:var(--ash)}
     <svg id="ribbon" viewBox="0 0 1000 250" role="img" aria-label="十六个标的当前恐慌分位分布"></svg>
   </section>
 
+  <section class="band">
+    <div class="band-head">
+      <h2 class="kicker">贪婪档 · Greed Tiers</h2>
+    </div>
+    <div class="greed-legend" id="greed-legend"></div>
+    <p class="greed-disclaimer">
+      贪婪档为情绪参考。回测显示对长牛资产机械卖出显著跑输持有，详见验证报告。
+      <span class="en">Greed tiers are sentiment reference only. Backtesting shows that mechanically
+      selling long-bull assets significantly underperforms simply holding — see the validation report.</span>
+    </p>
+  </section>
+
   <section class="panels" id="panels"></section>
 
   <footer>
@@ -184,6 +209,7 @@ const el=(t,a={})=>{const n=document.createElementNS(NS,t);for(const k in a)n.se
 const $=s=>document.querySelector(s);
 const V=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 const ZC={L1:'--l1',L2:'--l2',L3:'--l3',L4:'--l4'};
+const GZC={G1:'--g1',G2:'--g2',G3:'--g3',G4:'--g4'};
 const SQ=v=>Math.sqrt(Math.max(0,v));
 const REDUCED=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const fmt=v=>v>=10?v.toFixed(1):v.toFixed(2);
@@ -219,6 +245,8 @@ function demo(){
   return {demo:true,generated_at:'2026-08-20T09:00:00',years:10,
     tiers:[{key:'L1',name:'观察',max:20},{key:'L2',name:'建仓',max:10},
            {key:'L3',name:'加码',max:5},{key:'L4',name:'重仓',max:2}],
+    greed_tiers:[{key:'G1',name:'1级贪婪',threshold:65},{key:'G2',name:'2级贪婪',threshold:78},
+           {key:'G3',name:'3级贪婪',threshold:88},{key:'G4',name:'4级贪婪',threshold:95}],
     assets:defs.map(([symbol,name,currency,fv,px,note])=>{
       const N=760,series=[];let v=48+r()*24,p=px*(0.35+r()*0.4);
       for(let i=0;i<N;i++){
@@ -235,7 +263,10 @@ function demo(){
       return {symbol,name,currency,tradeable:'',note:note||'',
         tier:fv<=2?'L4':fv<=5?'L3':fv<=10?'L2':fv<=20?'L1':null,
         latest:{date:last.d,value:last.v,price:last.p},
-        low:{date:lo.d,value:lo.v},series};
+        low:{date:lo.d,value:lo.v},series,
+        greed_touches:{G1:{count:Math.round(8+r()*30),last:null},G2:{count:Math.round(6+r()*24),last:null},
+          G3:{count:Math.round(4+r()*16),last:null},G4:{count:Math.round(r()*8),last:null}},
+        greed_note:symbol==='CL=F'?'该标的贪婪三档经回测双重验证（事件研究 + 全策略模拟 + 阈值±5稳健性），详见验证报告':''};
     })};
 }
 
@@ -295,11 +326,24 @@ function ribbon(data){
   lg.appendChild(s);
 }
 
+/* ---------- 贪婪档参考 ---------- */
+function greedLegend(tiers){
+  const lg=$('#greed-legend');lg.innerHTML='';
+  tiers.forEach(t=>{
+    const s=document.createElement('span');
+    s.innerHTML=`<i style="background:${V(GZC[t.key])}"></i>${t.key} ${t.name} ≥${t.threshold}`;
+    lg.appendChild(s);
+  });
+}
+
 /* ---------- 单个资产：价格在上，深度在下，共用 x 轴 ---------- */
-function panel(a,tiers,idx){
+function panel(a,tiers,greedTiers,idx){
   const z=zoneOf(a.latest.value,tiers);
   const col=z?V(ZC[z.key]):V('--ash');
   const n=a.series.length;
+
+  const gt=a.greed_touches;
+  const greedStr=gt&&greedTiers?greedTiers.map(t=>`${t.key}×${gt[t.key]?gt[t.key].count:0}`).join(' · '):'';
 
   const box=document.createElement('div');box.className='panel';
   box.innerHTML=`
@@ -321,6 +365,7 @@ function panel(a,tiers,idx){
       <span>期内最低 <u>${fmt(a.low.value)}</u> · ${a.low.date}</span>
       ${a.tier?`<span>已解锁 <u>${a.tier}</u></span>`:''}
       ${a.tradeable?`<span>可买 <u>${a.tradeable}</u></span>`:''}
+      ${greedStr?`<span>贪婪触及 <u>${greedStr}</u></span>`:''}
     </div>`;
 
   const chart=document.createElement('div');chart.className='p-chart';
@@ -419,6 +464,10 @@ function panel(a,tiers,idx){
     const p=document.createElement('p');p.className='p-note';p.textContent=a.note;
     box.appendChild(p);
   }
+  if(a.greed_note){
+    const p=document.createElement('p');p.className='p-note-greed';p.textContent=a.greed_note;
+    box.appendChild(p);
+  }
   $('#panels').appendChild(box);
 
   if(!REDUCED){
@@ -442,8 +491,9 @@ function render(d){
   $('#c-low').textContent=fmt(low);
   $('#c-date').textContent=(d.assets[0]?.latest.date||d.generated_at||'').slice(5,10).replace('-','/');
   ribbon(d);
+  if(d.greed_tiers)greedLegend(d.greed_tiers);
   $('#panels').innerHTML='';
-  d.assets.forEach((a,i)=>panel(a,d.tiers,i));
+  d.assets.forEach((a,i)=>panel(a,d.tiers,d.greed_tiers,i));
 }
 
 fetch('dashboard_data.json',{cache:'no-store'})

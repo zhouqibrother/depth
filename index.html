@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>一位比特国王 · 恐慌深度</title>
+<meta name="description" content="十六个全球市场的恐慌深度读数。一个比特：该买，或者不该买。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0B0714; --vault:#150F24; --vault2:#1B1430;
+  --edge:#241A3A; --edge-soft:#1C1430;
+  --pearl:#D8D2E8; --ash:#8378A0; --dusk:#584B72;
+  --crown:#E6B450;                     /* 只给王冠与「一个比特」用 */
+  --quartz:#7FE3D4;                    /* 价格线 */
+  --l1:#3D5A8A; --l2:#C9932E; --l3:#D9622F; --l4:#D6335C;
+  --display:"Sora",-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--ink);color:var(--pearl);
+  font-family:var(--display);font-weight:300;font-size:15px;line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1160px;margin:0 auto;padding:0 26px}
+a{color:var(--crown);text-decoration:none;border-bottom:1px solid rgba(230,180,80,.3)}
+a:hover{border-bottom-color:var(--crown)}
+
+/* ---------- 王冠标识 ---------- */
+.brand{display:flex;align-items:center;gap:11px;padding:34px 0 0}
+.crown-mark{width:26px;height:20px;flex-shrink:0}
+.brand-name{font-family:var(--display);font-weight:800;font-size:16px;letter-spacing:.02em}
+.brand-at{font-family:var(--mono);font-size:12px;color:var(--dusk);margin-left:auto}
+
+/* ---------- hero ---------- */
+header{padding:58px 0 52px}
+h1{
+  font-family:var(--display);font-weight:800;
+  font-size:clamp(40px,7.4vw,78px);line-height:.98;
+  letter-spacing:-.035em;margin:0 0 26px;max-width:15ch;
+}
+h1 .bit{
+  font-family:var(--mono);font-weight:700;color:var(--crown);
+  font-size:.86em;letter-spacing:-.02em;
+}
+.lede{max-width:46ch;color:var(--ash);font-size:16.5px;margin:0}
+.counter{
+  display:flex;gap:0;margin-top:44px;border:1px solid var(--edge);
+  border-radius:5px;overflow:hidden;background:var(--vault);flex-wrap:wrap;
+}
+.counter div{flex:1;min-width:118px;padding:17px 20px;border-right:1px solid var(--edge)}
+.counter div:last-child{border-right:none}
+.counter b{display:block;font-family:var(--mono);font-weight:700;font-size:27px;line-height:1.1}
+.counter span{
+  display:block;font-family:var(--mono);font-size:10px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--dusk);margin-top:6px;
+}
+
+/* ---------- 一览 ---------- */
+.band{padding:40px 0;border-top:1px solid var(--edge)}
+.band-head{display:flex;justify-content:space-between;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:24px}
+.kicker{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--dusk);margin:0}
+.legend{display:flex;gap:15px;font-family:var(--mono);font-size:11px;color:var(--ash);flex-wrap:wrap}
+.legend i{font-style:normal;width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:6px;vertical-align:1px}
+#ribbon{width:100%;height:auto;display:block}
+
+/* ---------- 资产面板 ---------- */
+.panels{padding:8px 0 40px}
+.panel{
+  border:1px solid var(--edge);border-radius:6px;background:var(--vault);
+  margin-bottom:14px;overflow:hidden;
+}
+.panel-top{
+  display:grid;grid-template-columns:1fr auto;gap:20px;
+  padding:19px 22px 15px;align-items:start;
+}
+.p-sym{font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;color:var(--dusk);margin:0 0 5px}
+.p-name{font-family:var(--display);font-weight:600;font-size:21px;letter-spacing:-.015em;margin:0}
+.p-px{font-family:var(--mono);font-size:13px;color:var(--quartz);margin:7px 0 0}
+.p-px em{font-style:normal;color:var(--dusk);font-size:10.5px;margin-left:5px;letter-spacing:.08em}
+.p-right{display:flex;align-items:center;gap:18px}
+.p-pct{text-align:right}
+.p-pct b{display:block;font-family:var(--mono);font-weight:700;font-size:25px;line-height:1}
+.p-pct span{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;color:var(--dusk);margin-top:5px}
+.bitbox{
+  width:56px;height:56px;flex-shrink:0;border-radius:5px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-weight:700;font-size:30px;line-height:1;
+  border:1px solid var(--edge);color:var(--dusk);background:var(--ink);
+}
+.bitbox.on{color:var(--crown);border-color:var(--crown);background:rgba(230,180,80,.07)}
+.p-meta{
+  padding:0 22px 15px;display:flex;gap:20px;flex-wrap:wrap;
+  font-family:var(--mono);font-size:11px;color:var(--dusk);
+}
+.p-meta u{text-decoration:none;color:var(--ash)}
+.p-chart{position:relative;padding:0 10px 12px}
+.p-chart svg{width:100%;height:auto;display:block;overflow:visible}
+.p-note{
+  margin:0;padding:0 22px 16px;font-size:11.5px;color:var(--dusk);
+  line-height:1.5;max-width:70ch;
+}
+.tip{
+  position:absolute;pointer-events:none;opacity:0;transition:opacity .1s;
+  background:var(--vault2);border:1px solid var(--edge);border-radius:4px;
+  padding:8px 11px;font-family:var(--mono);font-size:11px;white-space:nowrap;
+  transform:translate(-50%,-118%);z-index:6;line-height:1.5;
+}
+.tip b{color:var(--pearl);font-weight:500}
+.tip u{text-decoration:none;color:var(--quartz);display:block}
+.tip i{font-style:normal;color:var(--dusk);display:block;font-size:10px}
+
+footer{border-top:1px solid var(--edge);padding:34px 0 64px;color:var(--dusk);font-size:12.5px}
+footer p{max-width:64ch;margin:0 0 11px;line-height:1.6}
+footer code{font-family:var(--mono);font-size:11.5px;color:var(--ash)}
+.copyright{margin-top:22px;font-family:var(--mono);font-size:11px;color:var(--dusk)}
+.banner{
+  margin-top:24px;background:rgba(201,147,46,.08);border:1px solid var(--l2);
+  color:var(--l2);padding:11px 15px;border-radius:4px;
+  font-family:var(--mono);font-size:11.5px;
+}
+
+@media (max-width:760px){
+  .wrap{padding:0 17px}
+  header{padding:40px 0 36px}
+  .panel-top{grid-template-columns:1fr;gap:14px}
+  .p-right{justify-content:space-between}
+  .p-name{font-size:19px}
+}
+:focus-visible{outline:2px solid var(--crown);outline-offset:3px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="brand">
+    <svg class="crown-mark" viewBox="0 0 26 20" aria-hidden="true">
+      <path d="M2 17h22M3 15l-1.6-11 6.4 5L13 2l5.2 7 6.4-5L23 15z"
+            fill="none" stroke="#E6B450" stroke-width="1.6"
+            stroke-linejoin="round" stroke-linecap="round"/>
+    </svg>
+    <span class="brand-name">一位比特国王</span>
+    <span class="brand-at">@onebitking</span>
+  </div>
+
+  <header>
+    <h1>十六个市场，<br>一个<span class="bit">比特</span>。</h1>
+    <p class="lede">每个市场的恐慌程度，压进它自己几十年的历史里排个位次。跌进建仓区，这一位就置 1。其余时候，全是 0。</p>
+    <div class="counter">
+      <div><b id="c-on">—</b><span>置位</span></div>
+      <div><b id="c-total">—</b><span>标的</span></div>
+      <div><b id="c-low">—</b><span>最深分位</span></div>
+      <div><b id="c-date">—</b><span>数据日期</span></div>
+    </div>
+    <div class="banner" id="demo-banner" hidden>正在显示示例数据。把 dashboard_data.json 放在同一目录即可看到真实读数。</div>
+  </header>
+
+  <section class="band">
+    <div class="band-head">
+      <h2 class="kicker">当前分布</h2>
+      <div class="legend" id="legend"></div>
+    </div>
+    <svg id="ribbon" viewBox="0 0 1000 250" role="img" aria-label="十六个标的当前恐慌分位分布"></svg>
+  </section>
+
+  <section class="panels" id="panels"></section>
+
+  <footer>
+    <p>纵轴是平方根刻度。四条档位线全挤在 0–20 这一小段，线性轴会把它们压成一条，看不出彼此距离。</p>
+    <p>价格轴取对数，因为这些标的十年里的量级差了几倍到几十倍。指数按本币计价，未做汇率换算。</p>
+    <p>刷新数据：<code>python3 export_dashboard.py</code>，然后替换 <code>dashboard_data.json</code>。</p>
+    <p class="copyright">© 2026 一位比特国王 · 保留所有权利。本站界面设计、图表实现与指标算法为原创作品，未经许可不得复制或用于商业用途。</p>
+  </footer>
+</div>
+
+<script>
+const NS='http://www.w3.org/2000/svg';
+const el=(t,a={})=>{const n=document.createElementNS(NS,t);for(const k in a)n.setAttribute(k,a[k]);return n;};
+const $=s=>document.querySelector(s);
+const V=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const ZC={L1:'--l1',L2:'--l2',L3:'--l3',L4:'--l4'};
+const SQ=v=>Math.sqrt(Math.max(0,v));
+const REDUCED=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const fmt=v=>v>=10?v.toFixed(1):v.toFixed(2);
+
+const SYMBOLS={USD:'$',EUR:'€',JPY:'¥',HKD:'HK$',CNY:'¥',INR:'₹'};
+function money(p,cur){
+  if(p==null)return '—';
+  const s=SYMBOLS[cur]||'';
+  const d=p>=1000?0:p>=10?2:4;
+  return s+p.toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});
+}
+/** 最严格的那一档，没进任何档位返回 null */
+function zoneOf(v,tiers){
+  let hit=null;
+  for(const t of tiers) if(t.max!=null&&v<=t.max) hit=t;
+  return hit;
+}
+
+/* ---------- 示例数据 ---------- */
+function demo(){
+  const defs=[
+    ['BTC-USD','比特币','USD',59.9,68400,''],['GC=F','黄金期货','USD',43.6,2410,'前月连续合约，换月日有价格跳空'],
+    ['CL=F','原油期货','USD',25.0,71.4,'前月连续合约，换月日有价格跳空'],['^GSPC','标普500','USD',56.9,5630,''],
+    ['^STOXX50E','欧洲斯托克50','EUR',77.1,4980,''],['^NSEI','印度Nifty50','INR',37.8,24100,''],
+    ['^N225','日经225','JPY',37.3,38200,''],['^HSI','恒生指数','HKD',67.8,17600,''],
+    ['000001.SS','上证指数','CNY',44.0,2890,''],['AAPL','苹果','USD',35.4,224],
+    ['MSFT','微软','USD',37.8,417],['GOOGL','谷歌','USD',13.3,163],
+    ['NVDA','英伟达','USD',41.9,118],['AMZN','亚马逊','USD',28.9,178],
+    ['TSLA','特斯拉','USD',19.3,216],['TSM','台积电','USD',16.2,168]
+  ];
+  let s=20260820;const r=()=>{s=(s*1664525+1013904223)%4294967296;return s/4294967296;};
+  const end=new Date('2026-08-20');
+  return {demo:true,generated_at:'2026-08-20T09:00:00',years:10,
+    tiers:[{key:'L1',name:'观察',max:20},{key:'L2',name:'建仓',max:10},
+           {key:'L3',name:'加码',max:5},{key:'L4',name:'重仓',max:2}],
+    assets:defs.map(([symbol,name,currency,fv,px,note])=>{
+      const N=760,series=[];let v=48+r()*24,p=px*(0.35+r()*0.4);
+      for(let i=0;i<N;i++){
+        v=Math.max(.4,Math.min(99.6,v+(50-v)*.013+(r()-.5)*7));
+        p*=1+(r()-.5)*.045;
+        const w=Math.pow(i/(N-1),2.4);
+        const d=new Date(end);d.setDate(d.getDate()-(N-1-i));
+        if(d.getDay()%6===0)continue;
+        series.push({d:d.toISOString().slice(0,10),
+          v:Math.round((v*(1-w)+fv*w)*100)/100,
+          p:Math.round((p*(1-w)+px*w)*10000)/10000});
+      }
+      const lo=series.reduce((a,b)=>b.v<a.v?b:a),last=series[series.length-1];
+      return {symbol,name,currency,tradeable:'',note:note||'',
+        tier:fv<=2?'L4':fv<=5?'L3':fv<=10?'L2':fv<=20?'L1':null,
+        latest:{date:last.d,value:last.v,price:last.p},
+        low:{date:lo.d,value:lo.v},series};
+    })};
+}
+
+/* ---------- 顶部分布 ---------- */
+function ribbon(data){
+  const svg=$('#ribbon');svg.innerHTML='';
+  const W=1000,H=250,L=16,R=132,T=34,B=40;
+  const x=v=>L+SQ(v)/10*(W-L-R);
+  const bands=data.tiers.filter(t=>t.max!=null).sort((a,b)=>a.max-b.max);
+
+  let prev=0;
+  for(const t of bands){
+    svg.appendChild(el('rect',{x:x(prev),y:T,width:x(t.max)-x(prev),height:H-T-B,
+      fill:V(ZC[t.key]),opacity:.15}));
+    prev=t.max;
+  }
+  for(const t of bands){
+    svg.appendChild(el('line',{x1:x(t.max),y1:T-9,x2:x(t.max),y2:H-B,
+      stroke:V(ZC[t.key]),'stroke-width':1,opacity:.55}));
+    const lb=el('text',{x:x(t.max),y:T-15,fill:V(ZC[t.key]),'font-family':V('--mono'),
+      'font-size':10.5,'text-anchor':'middle','letter-spacing':'.08em'});
+    lb.textContent=t.key;svg.appendChild(lb);
+  }
+  svg.appendChild(el('line',{x1:L,y1:H-B,x2:W-R,y2:H-B,stroke:V('--edge'),'stroke-width':1}));
+  [0,5,20,50,100].forEach(v=>{
+    const t=el('text',{x:x(v),y:H-B+17,fill:V('--dusk'),'font-family':V('--mono'),
+      'font-size':10,'text-anchor':'middle'});t.textContent=v;svg.appendChild(t);
+  });
+  const cap=el('text',{x:L,y:H-B+33,fill:V('--dusk'),'font-family':V('--mono'),'font-size':10});
+  cap.textContent='恐慌 ←　情绪分位　→ 贪婪';svg.appendChild(cap);
+
+  const sorted=[...data.assets].sort((a,b)=>a.latest.value-b.latest.value);
+  const lanes=6,lh=(H-T-B-14)/lanes;
+  sorted.forEach((a,i)=>{
+    const cx=x(a.latest.value),cy=T+9+lh*(i%lanes)+lh/2;
+    const z=zoneOf(a.latest.value,data.tiers);
+    const c=z?V(ZC[z.key]):V('--ash');
+    const g=el('g',{});
+    if(z)g.appendChild(el('circle',{cx,cy,r:9,fill:'none',stroke:c,'stroke-width':1,opacity:.4}));
+    g.appendChild(el('circle',{cx,cy,r:z?4.5:3,fill:c,opacity:z?1:.6}));
+    const t=el('text',{x:cx+13,y:cy+4,fill:z?c:V('--ash'),'font-family':V('--mono'),'font-size':10.5});
+    t.textContent=a.symbol;g.appendChild(t);
+    svg.appendChild(g);
+  });
+
+  const lg=$('#legend');lg.innerHTML='';
+  const cnt={};
+  data.assets.forEach(a=>{const z=zoneOf(a.latest.value,data.tiers);cnt[z?z.key:'-']=(cnt[z?z.key:'-']||0)+1;});
+  [...bands].reverse().forEach(t=>{
+    if(!cnt[t.key])return;
+    const s=document.createElement('span');
+    s.innerHTML=`<i style="background:${V(ZC[t.key])}"></i>${t.key} ${t.name} ${cnt[t.key]}`;
+    lg.appendChild(s);
+  });
+  const s=document.createElement('span');
+  s.innerHTML=`<i style="background:${V('--ash')}"></i>未入区 ${cnt['-']||0}`;
+  lg.appendChild(s);
+}
+
+/* ---------- 单个资产：价格在上，深度在下，共用 x 轴 ---------- */
+function panel(a,tiers,idx){
+  const z=zoneOf(a.latest.value,tiers);
+  const col=z?V(ZC[z.key]):V('--ash');
+  const n=a.series.length;
+
+  const box=document.createElement('div');box.className='panel';
+  box.innerHTML=`
+    <div class="panel-top">
+      <div>
+        <p class="p-sym">${a.symbol}</p>
+        <h3 class="p-name">${a.name}</h3>
+        <p class="p-px">${money(a.latest.price,a.currency)}<em>${a.currency}</em></p>
+      </div>
+      <div class="p-right">
+        <div class="p-pct">
+          <b style="color:${col}">${fmt(a.latest.value)}</b>
+          <span>分位</span>
+        </div>
+        <div class="bitbox${z?' on':''}" title="${z?'已进入 '+z.key+' '+z.name:'未进入任何档位'}">${z?'1':'0'}</div>
+      </div>
+    </div>
+    <div class="p-meta">
+      <span>期内最低 <u>${fmt(a.low.value)}</u> · ${a.low.date}</span>
+      ${a.tier?`<span>已解锁 <u>${a.tier}</u></span>`:''}
+      ${a.tradeable?`<span>可买 <u>${a.tradeable}</u></span>`:''}
+    </div>`;
+
+  const chart=document.createElement('div');chart.className='p-chart';
+  const W=880,PH=74,GAP=8,FH=176,H=PH+GAP+FH+22,PL=6,PR=50;
+  const svg=el('svg',{viewBox:`0 0 ${W} ${H}`,role:'img','aria-label':`${a.name} 价格与恐慌分位`});
+  const X=i=>PL+i/(n-1)*(W-PL-PR);
+
+  /* 价格：对数刻度 */
+  const px=a.series.map(s=>s.p).filter(v=>v!=null&&v>0);
+  if(px.length>1){
+    const lo=Math.log(Math.min(...px)),hi=Math.log(Math.max(...px)),sp=hi-lo||1;
+    const PY=v=>4+(1-(Math.log(v)-lo)/sp)*(PH-8);
+    let d='',open=false;
+    a.series.forEach((s,i)=>{
+      if(s.p==null||s.p<=0){open=false;return;}
+      d+=(open?'L':'M')+X(i).toFixed(1)+','+PY(s.p).toFixed(1);open=true;
+    });
+    svg.appendChild(el('path',{d,fill:'none',stroke:V('--quartz'),'stroke-width':1.2,
+      'stroke-linejoin':'round','vector-effect':'non-scaling-stroke',opacity:.85}));
+    [Math.max(...px),Math.min(...px)].forEach((v,k)=>{
+      const t=el('text',{x:W-PR+7,y:PY(v)+3.5,fill:V('--dusk'),'font-family':V('--mono'),'font-size':9.5});
+      t.textContent=money(v,a.currency);svg.appendChild(t);
+    });
+    const lab=el('text',{x:PL+2,y:11,fill:V('--quartz'),'font-family':V('--mono'),
+      'font-size':9,'letter-spacing':'.14em',opacity:.7});
+    lab.textContent='价格 · 对数';svg.appendChild(lab);
+  }
+
+  svg.appendChild(el('line',{x1:PL,y1:PH+GAP/2,x2:W-PR,y2:PH+GAP/2,
+    stroke:V('--edge'),'stroke-width':1}));
+
+  /* 深度：平方根刻度，0 在底部 */
+  const FT=PH+GAP,FB=H-22;
+  const Y=v=>FT+(1-SQ(v)/10)*(FB-FT);
+  const bands=tiers.filter(t=>t.max!=null).sort((b,c)=>c.max-b.max);
+  let lower=0;
+  [...bands].reverse().forEach(t=>{
+    svg.appendChild(el('rect',{x:PL,y:Y(t.max),width:W-PL-PR,height:Y(lower)-Y(t.max),
+      fill:V(ZC[t.key]),opacity:.12}));
+    lower=t.max;
+  });
+  bands.forEach(t=>{
+    svg.appendChild(el('line',{x1:PL,y1:Y(t.max),x2:W-PR,y2:Y(t.max),stroke:V(ZC[t.key]),
+      'stroke-width':1,opacity:.6,'stroke-dasharray':'3 3'}));
+    const lb=el('text',{x:W-PR+7,y:Y(t.max)+3.5,fill:V(ZC[t.key]),
+      'font-family':V('--mono'),'font-size':9.5});
+    lb.textContent=`${t.key} ${t.max}`;svg.appendChild(lb);
+  });
+  [50,100].forEach(v=>{
+    svg.appendChild(el('line',{x1:PL,y1:Y(v),x2:W-PR,y2:Y(v),stroke:V('--edge'),'stroke-width':1,opacity:.7}));
+    const lb=el('text',{x:W-PR+7,y:Y(v)+3.5,fill:V('--dusk'),'font-family':V('--mono'),'font-size':9.5});
+    lb.textContent=v;svg.appendChild(lb);
+  });
+
+  // 注意：这条线不能用 non-scaling-stroke。它会让虚线间隔按屏幕像素算，
+  // 而 getTotalLength() 返回的是 viewBox 坐标长度，两者不一致会导致
+  // 绘制动画把曲线切成「画一段断一段」。
+  const line=el('polyline',{
+    points:a.series.map((s,i)=>`${X(i).toFixed(1)},${Y(s.v).toFixed(1)}`).join(' '),
+    fill:'none',stroke:V('--pearl'),'stroke-width':1.1,'stroke-linejoin':'round',
+    opacity:.9});
+  svg.appendChild(line);
+  svg.appendChild(el('circle',{cx:X(n-1),cy:Y(a.series[n-1].v),r:3,fill:col}));
+
+  [0,Math.floor((n-1)/2),n-1].forEach((i,k)=>{
+    const t=el('text',{x:X(i),y:H-6,fill:V('--dusk'),'font-family':V('--mono'),'font-size':9.5,
+      'text-anchor':k===0?'start':k===2?'end':'middle'});
+    t.textContent=a.series[i].d;svg.appendChild(t);
+  });
+
+  const cross=el('line',{x1:0,y1:4,x2:0,y2:FB,stroke:V('--pearl'),'stroke-width':1,
+    opacity:0,'vector-effect':'non-scaling-stroke'});
+  svg.appendChild(cross);
+  const tip=document.createElement('div');tip.className='tip';
+
+  const move=e=>{
+    const r=svg.getBoundingClientRect();
+    const cx=e.touches?e.touches[0].clientX:e.clientX;
+    const i=Math.max(0,Math.min(n-1,Math.round(((cx-r.left)/r.width*W-PL)/(W-PL-PR)*(n-1))));
+    const s=a.series[i];
+    cross.setAttribute('x1',X(i));cross.setAttribute('x2',X(i));cross.setAttribute('opacity',.28);
+    tip.style.opacity=1;
+    tip.style.left=(X(i)/W*100)+'%';
+    tip.style.top=(Y(s.v)/H*100)+'%';
+    tip.innerHTML=`<b>分位 ${fmt(s.v)}</b><u>${money(s.p,a.currency)}</u><i>${s.d}</i>`;
+  };
+  const out=()=>{cross.setAttribute('opacity',0);tip.style.opacity=0;};
+  svg.addEventListener('mousemove',move);
+  svg.addEventListener('mouseleave',out);
+  svg.addEventListener('touchmove',move,{passive:true});
+  svg.addEventListener('touchend',out);
+
+  chart.appendChild(svg);chart.appendChild(tip);
+  box.appendChild(chart);
+  if(a.note){
+    const p=document.createElement('p');p.className='p-note';p.textContent=a.note;
+    box.appendChild(p);
+  }
+  $('#panels').appendChild(box);
+
+  if(!REDUCED){
+    const len=line.getTotalLength();
+    line.style.strokeDasharray=len;line.style.strokeDashoffset=len;
+    line.style.transition='stroke-dashoffset 1s cubic-bezier(.22,.8,.3,1)';
+    // 动画结束后清掉虚线图案，避免任何情况下残留的 dash 把曲线切断
+    line.addEventListener('transitionend',()=>{line.style.strokeDasharray='none';},{once:true});
+    setTimeout(()=>{line.style.strokeDashoffset=0;},50+idx*40);
+  }
+}
+
+/* ---------- 渲染 ---------- */
+function render(d){
+  $('#demo-banner').hidden=!d.demo;
+  const on=d.assets.filter(a=>zoneOf(a.latest.value,d.tiers)).length;
+  const low=Math.min(...d.assets.map(a=>a.latest.value));
+  $('#c-on').textContent=on;
+  $('#c-on').style.color=on?V('--crown'):V('--dusk');
+  $('#c-total').textContent=d.assets.length;
+  $('#c-low').textContent=fmt(low);
+  $('#c-date').textContent=(d.assets[0]?.latest.date||d.generated_at||'').slice(5,10).replace('-','/');
+  ribbon(d);
+  $('#panels').innerHTML='';
+  d.assets.forEach((a,i)=>panel(a,d.tiers,i));
+}
+
+fetch('dashboard_data.json',{cache:'no-store'})
+  .then(r=>{if(!r.ok)throw 0;return r.json();})
+  .then(render)
+  .catch(()=>render(demo()));
+</script>
+</body>
+</html>

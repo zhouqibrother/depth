@@ -76,6 +76,21 @@ h1{font-weight:800;font-size:clamp(36px,5.4vw,62px);line-height:1.09;
 .scale-ends{display:flex;justify-content:space-between;gap:12px;margin-top:9px;
   font-size:14.5px;font-weight:600}
 
+.composite{margin-top:30px;border:2px solid var(--rule);border-radius:16px;
+  background:var(--card);padding:26px 30px;display:flex;align-items:center;
+  justify-content:space-between;gap:30px;flex-wrap:wrap}
+.composite-main{display:flex;flex-direction:column;gap:7px;min-width:230px}
+.composite-label{font-size:15.5px;font-weight:700;color:var(--ink2);letter-spacing:.01em}
+.composite-num{font-family:var(--mono);font-weight:800;line-height:1;
+  font-size:clamp(52px,8vw,92px);letter-spacing:-.02em}
+.composite-meta{font-size:14.5px;color:var(--ink3)}
+.composite-spark{flex:1 1 240px;min-width:180px;max-width:420px;height:78px}
+.composite-spark svg{width:100%;height:100%;display:block;overflow:visible}
+@media (max-width:780px){
+  .composite{padding:20px 20px;gap:18px}
+  .composite-num{font-size:clamp(44px,13vw,64px)}
+}
+
 .notice{margin-top:22px;background:var(--warnbg);border:2px solid var(--warnbd);
   color:var(--warnfg);padding:14px 18px;border-radius:8px;font-size:16.5px;font-weight:500}
 
@@ -223,6 +238,14 @@ footer code{font-family:var(--mono);font-size:15px;color:var(--ink);background:v
 
   <header>
     <h1 id="h1"></h1>
+    <div class="composite" id="composite" hidden title="">
+      <div class="composite-main">
+        <span class="composite-label" id="cLabel"></span>
+        <b class="composite-num" id="cNum">—</b>
+        <span class="composite-meta" id="cMeta"></span>
+      </div>
+      <div class="composite-spark"><svg id="cSpark" viewBox="0 0 300 64" role="img"></svg></div>
+    </div>
     <div class="scale">
       <div class="scale-bar" id="scaleBar"></div>
       <div class="scale-ends"><span id="scaleLo"></span><span id="scaleHi"></span></div>
@@ -274,6 +297,9 @@ const I18N={
  zh:{brand:'一位比特国王',h1:'十六个全球市场<br>贪婪恐慌深度',
   scaleLo:'越绿 · 越恐慌 · 越便宜',scaleHi:'越红 · 越贪婪 · 越贵',
   scaleLoCB:'越蓝 · 越恐慌 · 越便宜',scaleHiCB:'越橙 · 越贪婪 · 越贵',
+  compositeLabel:'今日全球恐慌温度',
+  compositeMeta:(d,pct)=>`16 个标的按权重合成 · ${d} 收盘${pct<100?` · 权重覆盖 ${pct}%`:''}`,
+  compositeHint:'把16个标的的分位按 config.yaml 里的权重加权平均。某标的当天没有收盘价（跨市场假日不对齐）时，用它最近一次的读数顶替；某标的历史起点较晚导致当天权重覆盖不满100%时，按当天实际参与的权重重新归一化，不会把缺数据的标的当0分算。',
   dist:'当前分布',sortFear:'按恐慌程度排序',sortOrig:'按原顺序排列',
   greed:'贪婪',fear:'恐慌',pct:'分位',copy:'复制概览',copied:'已复制',noTier:'不操作',deploy:'投 ',
   profTitle:'历史画像 · 按本标的自己的数据',times:'次',lastAt:'上次',
@@ -296,11 +322,15 @@ const I18N={
    '纵轴用平方根刻度，四条档位线才拉得开。价格轴取对数。指数按本币计价，未做汇率换算。',
    '贪婪四档（1–4 级贪婪）<b>不是系统信号</b>——系统没有任何卖出逻辑。这四档已经用16个标的的全历史回测验证过：对长牛资产机械卖出的收益和风险调整后收益都显著跑输单纯持有，只有原油期货（CL=F）通过事件研究和全策略模拟的双重验证是例外，详见验证报告。阈值也不是恐慌档的镜像：纵轴刻意把恐慌端拉开了，镜像过去四条线会叠在一起。',
    '右侧徽章直接对应系统的四级恐慌档，百分比是该档要投的配额。但它只回答「当前读数落在哪一档」——<b>真正触发还要同时满足连续天数、BTC 的 AHR999 门槛，以及 30 日窗口和总量闸门</b>。系统没有卖出逻辑，所以没有卖出档，高位的「贵」由颜色表达。',
+   '顶部「今日全球恐慌温度」是16个标的的分位按 config.yaml 权重加权合成，缺数据的标的用最近读数顶替、权重重新归一化，不代表任何一个单独市场。',
    '刷新数据：<code>python3 export_dashboard.py</code>，替换 <code>dashboard_data.json</code>。'],
   copyright:'© 2026 一位比特国王 · 保留所有权利。本站界面设计、图表实现与指标算法为原创作品，未经许可不得复制或用于商业用途。'},
  en:{brand:'One Bit King',h1:'Sixteen global markets<br>fear &amp; greed depth',
   scaleLo:'Greener · more fear · cheaper',scaleHi:'Redder · more greed · pricier',
   scaleLoCB:'Bluer · more fear · cheaper',scaleHiCB:'More orange · more greed · pricier',
+  compositeLabel:"Today's Global Fear Temperature",
+  compositeMeta:(d,pct)=>`Weighted across 16 assets · close ${d}${pct<100?` · weight coverage ${pct}%`:''}`,
+  compositeHint:"Weighted average of all 16 assets' percentiles using config.yaml weights. If an asset has no close that day (exchange holidays don't line up), its last known reading carries forward; if an asset's history starts later so coverage is under 100%, weights are renormalized across whatever assets actually have data that day — missing assets are never scored as 0.",
   dist:'Current spread',sortFear:'Sort by fear',sortOrig:'Original order',
   greed:'Greed',fear:'Fear',pct:'pctile',copy:'Copy summary',copied:'Copied',noTier:'No action',deploy:'',
   profTitle:'History — this asset’s own record',times:'×',lastAt:'last',
@@ -323,6 +353,7 @@ const I18N={
    'Vertical axis is square-root scaled so the four tier lines separate. Price axis is logarithmic. Indices are in local currency, not FX-converted.',
    'The four greed levels are <b>not system signals</b> — the system has no sell logic. They have been backtested across all 16 assets’ full history: mechanically selling long-bull assets significantly underperforms simply holding, on both return and risk-adjusted return, with the sole exception of crude oil (CL=F), which passed double verification via event study and full-strategy simulation — see the validation report.',
    'The badge maps directly to the four system fear levels; the percentage is that tier’s allocation. It only answers which tier the current reading falls in — <b>actual triggering also requires the consecutive-day rule, the AHR999 gate, and the window and total budget throttles</b>. The system has no sell logic, so there are no sell tiers; expensive readings are conveyed by colour alone.',
+   "The “Today's Global Fear Temperature” at the top is all 16 assets' percentiles weighted per config.yaml; assets missing data carry forward their last reading with weights renormalized, and it doesn't represent any single market.",
    'Refresh: <code>python3 export_dashboard.py</code>, then replace <code>dashboard_data.json</code>.'],
   copyright:'© 2026 One Bit King · All rights reserved. The interface design, chart implementation and indicator methodology are original works.'}
 };
@@ -452,10 +483,7 @@ function demo(){
     ['TSLA','特斯拉','USD',19.3,216,''],['TSM','台积电','USD',16.2,168,'']];
   let s=20260821;const r=()=>{s=(s*1664525+1013904223)%4294967296;return s/4294967296;};
   const end=new Date('2026-08-20');
-  return {demo:true,generated_at:'2026-08-21T09:00:00',years:10,budget:2000,
-    tiers:[{key:'L1',name:'观察',max:18,ratio:0},{key:'L2',name:'建仓',max:8,ratio:.2},
-           {key:'L3',name:'加码',max:5,ratio:.3},{key:'L4',name:'重仓',max:2,ratio:.5}],
-    assets:defs.map(([symbol,name,currency,fv,px,note])=>{
+  const assets=defs.map(([symbol,name,currency,fv,px,note])=>{
       const N=740,series=[];let v=48+r()*24,p=px*(0.4+r()*0.4);
       for(let i=0;i<N;i++){
         v=Math.max(.4,Math.min(99.6,v+(50-v)*.013+(r()-.5)*7));p*=1+(r()-.5)*.045;
@@ -479,7 +507,25 @@ function demo(){
         greed_confirmed:symbol==='CL=F',
         profile:prof,hi52,latest:{date:last.d,value:last.v,price:last.p},
         low:{date:lo.d,value:lo.v},series};
-    })};
+    });
+  return {demo:true,generated_at:'2026-08-21T09:00:00',years:10,budget:2000,
+    tiers:[{key:'L1',name:'观察',max:18,ratio:0},{key:'L2',name:'建仓',max:8,ratio:.2},
+           {key:'L3',name:'加码',max:5,ratio:.3},{key:'L4',name:'重仓',max:2,ratio:.5}],
+    composite:demoComposite(assets),
+    assets};
+}
+// demo() 的 composite：16 个示例标的权重相等，直接按 d/日期对齐取平均即可，
+// 不需要真实数据里那套 forward-fill/权重归一化（示例数据本来就是逐日对齐生成的）。
+function demoComposite(assets){
+  const byDate={};
+  assets.forEach(a=>a.series.forEach(s=>{(byDate[s.d]=byDate[s.d]||[]).push(s.v);}));
+  const dates=Object.keys(byDate).sort();
+  const rows=dates.map(d=>{
+    const vs=byDate[d];
+    return {d,v:Math.round(vs.reduce((x,y)=>x+y,0)/vs.length*1000)/1000};
+  });
+  const last=rows[rows.length-1];
+  return {date:last.d,value:last.v,weight_covered:1,series90:rows.slice(-90)};
 }
 
 /* 标签防重叠：线画在真实位置，只把文字沿 y 推开。
@@ -793,12 +839,39 @@ function summaryText(){
   return [head,tail,'',...lines].join('\n');
 }
 
+/* ================= 综合指数 ================= */
+function renderComposite(d){
+  const box=$('#composite'),c=d.composite;
+  if(!c){box.hidden=true;return;}
+  box.hidden=false;
+  const col=heat(c.value);
+  box.title=T().compositeHint;
+  $('#cLabel').textContent=T().compositeLabel;
+  $('#cNum').textContent=fmt(c.value);
+  $('#cNum').style.color=col;
+  $('#cMeta').textContent=T().compositeMeta(c.date,Math.round(c.weight_covered*100));
+
+  const svg=$('#cSpark');svg.innerHTML='';
+  const pts=c.series90||[];
+  if(pts.length>1){
+    const W=300,H=64,PD=4;
+    const vs=pts.map(p=>p.v),lo=Math.min(...vs),hi=Math.max(...vs),sp=(hi-lo)||1;
+    const X=i=>PD+i/(pts.length-1)*(W-2*PD);
+    const Y=v=>H-PD-(v-lo)/sp*(H-2*PD);
+    const d2=pts.map((p,i)=>`${i===0?'M':'L'}${X(i).toFixed(1)},${Y(p.v).toFixed(1)}`).join('');
+    svg.appendChild(el('path',{d:d2,fill:'none',stroke:col,'stroke-width':2.6,
+      'stroke-linejoin':'round','stroke-linecap':'round','vector-effect':'non-scaling-stroke'}));
+    svg.appendChild(el('circle',{cx:X(pts.length-1),cy:Y(pts[pts.length-1].v),r:4,fill:col}));
+  }
+}
+
 /* ================= 渲染 ================= */
 let DATA=null,byFear=true;   // 默认按恐慌程度排序
 const order=()=>byFear?[...DATA.assets].sort((a,b)=>a.latest.value-b.latest.value):DATA.assets;
 function draw(){
   timers.splice(0).forEach(clearInterval);liveTicks.length=0;
   const list=order();
+  renderComposite(DATA);
   ribbon(DATA,list);
   buildNav(list,DATA.tiers);
   $('#panels').innerHTML='';

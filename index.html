@@ -163,6 +163,13 @@ h2{font-size:22px;font-weight:700;margin:0;letter-spacing:-.01em}
   color:var(--ink3);font-family:var(--mono);margin-top:0}
 .gauge-caption{font-size:12.5px;color:var(--ink3);margin:0 0 22px;font-style:italic;line-height:1.5}
 
+.rate-notes{border-left:3px solid var(--rule);border-radius:0 10px 10px 0;background:var(--sunk);
+  padding:14px 18px 16px;margin:4px 0 22px}
+.rate-notes .rn-tag{font-size:12px;font-weight:700;letter-spacing:.02em;color:var(--ink3);
+  text-transform:uppercase;margin-bottom:8px}
+.rate-notes p{font-size:14.5px;color:var(--ink2);line-height:1.6;margin:0 0 8px}
+.rate-notes p:last-child{margin-bottom:0}
+
 .lpr-chart-host{margin:0 0 26px;border:2px solid var(--rule);border-radius:12px;
   background:var(--card);padding:18px 20px 12px}
 .lpr-chart-host svg{width:100%;height:auto;display:block}
@@ -333,7 +340,7 @@ footer code{font-family:var(--mono);font-size:15px;color:var(--ink);background:v
     <div class="divergence-box" id="divergenceBox" hidden></div>
     <div class="yield-grid" id="yieldGrid"></div>
     <p class="gauge-caption" id="yieldCaption"></p>
-    <div id="tltPanelHost"></div>
+    <div class="rate-notes" id="bondNotes"></div>
   </section>
 
   <section class="band-extra" id="extraSection" hidden>
@@ -356,6 +363,7 @@ footer code{font-family:var(--mono);font-size:15px;color:var(--ink);background:v
       <table class="china-table" id="chinaTable"></table>
     </div>
     <p class="china-asof" id="chinaAsOf"></p>
+    <div class="rate-notes" id="chinaNotes"></div>
   </section>
 
   <footer id="footer"></footer>
@@ -386,9 +394,8 @@ const NAME_EN={'BTC-USD':'Bitcoin','GC=F':'Gold Futures','CL=F':'Crude Oil Futur
  'GOOGL':'Alphabet','NVDA':'NVIDIA','AMZN':'Amazon','TSLA':'Tesla','TSM':'TSMC',
  '^NDX':'Nasdaq 100','TLT':'20+ Year Treasury ETF'};
 const TIER_EN={'观察':'Watch','建仓':'Enter','加码':'Add','重仓':'Load up'};
-const MACRO_NAME_EN={yield_curve_2s10s:'2y/10y Spread',credit_spread:'Credit Spread (Baa–10y)',
- move_index:'MOVE Index',yield_3m:'3-Month Yield',yield_2y:'2-Year Yield',
- yield_10y:'10-Year Yield',yield_30y:'30-Year Yield',
+const MACRO_NAME_EN={yield_curve_2s10s:'2y/10y Spread',yield_3m:'3-Month Yield',
+ yield_10y:'10-Year Yield',
  lpr_1y:'LPR 1-Year',lpr_5y:'LPR 5-Year+'};
 const MACRO_NOTE_EN={yield_3m:'≈ short-term cash / money-market yield reference',
  lpr_1y:'≈ corporate loan pricing benchmark',lpr_5y:'≈ mortgage pricing benchmark'};
@@ -405,20 +412,23 @@ const I18N={
   extraTitle:'独立观察标的',
   extraHint:'算法跟上面9个标的完全一样，但不进综合指数权重，也不占建仓预算——纯展示，不参与系统的任何判断。',
   coreStarTitle:'★ 主理人核心长期配置——这是个人观点标注，不是系统信号，跟档位/触发逻辑无关',
-  bondTitle:'债市温度',
-  bondHint:'TLT(20年期以上美债ETF)按跟其余标的一样的算法出恐慌分位；收益率曲线、信用利差、MOVE指数来自FRED/yfinance的宏观序列，各自算自己的历史展开百分位——不进综合指数，也是纯展示。',
-  yieldCurveLabel:'2年/10年利差',creditSpreadLabel:'信用利差',moveLabel:'MOVE指数',
+  bondTitle:'美债利率',
+  bondHint:'TLT(20年期以上美债ETF)按跟其余标的一样的算法出恐慌分位；收益率曲线、3个月/10年期收益率来自FRED/yfinance的宏观序列，各自算自己的历史展开百分位——不进综合指数，也是纯展示。',
+  yieldCurveLabel:'2年/10年利差',
   curveNormal:'正常',curveInverted:'倒挂中',
   curveSub:(v,s)=>`当前 <b>${v>=0?'+':''}${v.toFixed(2)}%</b> · ${s}`,
   pctSub:v=>`历史分位 <b>${fmt(v)}</b>`,
-  spreadSub:v=>`当前 <b>${v.toFixed(2)}%</b>`,
-  moveSub:v=>`当前 <b>${v.toFixed(1)}</b>`,
   divergenceLabel:'今日股债温差',
   divergenceFormula:(c,t)=>`综合恐慌分位 <b>${fmt(c)}</b> − TLT恐慌分位 <b>${fmt(t)}</b>`,
   divergenceEpisodes:'历史上两者同时进入恐慌区：',
   divergenceNone:'历史上两者从未同时进入恐慌区',
   yieldPctLabel:'历史分位',
   gaugeCaption:'颜色表示利率在自身历史区间的位置，与资产恐慌色带无关。',
+  rateNoteTag:'历史背景参考，非预测信号',
+  bondNote1:'收益率快速上行通常压缩股票估值——2022 年 10 年期利率从 1.5% 升至 4.2%，标普跌 25%、纳指跌 33%；但温和上行常与牛市并存（2016-2018）。对股市而言，利率变化的速度比方向更重要。',
+  bondNote2:'收益率急速下坠往往不是利好而是避险信号——2020 年 3 月、2008 年的收益率暴跌都伴随股市深跌；降息周期初期市场常先跌后涨。',
+  chinaNote1:'LPR 连续下调代表宽松周期，历史上是 A 股/港股的流动性支撑，但 2022-2025 连降期间股市依旧疲弱——宽松是必要条件，不是充分条件。',
+  chinaNote2:'存款利率降至历史低位会推动储蓄寻找收益出口，长期利好分红资产与权益市场，但这一进程以年计。',
   chinaTitle:'中国利率',
   chinaHint:'LPR(贷款市场报价利率)由央行每月20日发布，数据来自东方财富。本区块为利率参考信息，不接入恐慌分位配色体系。四大行存款利率为人工核对维护，更新日期见表下标注。',
   chinaCompare:(dep,comp)=>`1年定存 <b>${dep.toFixed(2)}%</b> · 今日全球恐慌温度 <b>${fmt(comp)}</b>`,
@@ -460,20 +470,23 @@ const I18N={
   extraTitle:'Independent watch list',
   extraHint:"Same methodology as the 9 assets above, but excluded from the composite index weight and the budget — display only, not part of any system decision.",
   coreStarTitle:'★ Core long-term holding — a personal opinion marker, not a system signal, unrelated to the tier/trigger logic',
-  bondTitle:'Bond Market Temperature',
-  bondHint:"TLT (20+ Year Treasury ETF) gets a fear percentile the same way as every other asset. The yield curve, credit spread, and MOVE index are FRED/yfinance macro series, each with its own expanding historical percentile — excluded from the composite index, display only.",
-  yieldCurveLabel:'2y/10y Spread',creditSpreadLabel:'Credit Spread',moveLabel:'MOVE Index',
+  bondTitle:'U.S. Treasury Rates',
+  bondHint:"TLT (20+ Year Treasury ETF) gets a fear percentile the same way as every other asset. The yield curve, and the 3-month/10-year yields, are FRED/yfinance macro series, each with its own expanding historical percentile — excluded from the composite index, display only.",
+  yieldCurveLabel:'2y/10y Spread',
   curveNormal:'Normal',curveInverted:'Inverted',
   curveSub:(v,s)=>`Now <b>${v>=0?'+':''}${v.toFixed(2)}%</b> · ${s}`,
   pctSub:v=>`Historical pctile <b>${fmt(v)}</b>`,
-  spreadSub:v=>`Now <b>${v.toFixed(2)}%</b>`,
-  moveSub:v=>`Now <b>${v.toFixed(1)}</b>`,
   divergenceLabel:"Today's Stock-Bond Divergence",
   divergenceFormula:(c,t)=>`Composite fear <b>${fmt(c)}</b> − TLT fear <b>${fmt(t)}</b>`,
   divergenceEpisodes:'Historically both entered a fear zone together in:',
   divergenceNone:'Both have never entered a fear zone at the same time',
   yieldPctLabel:'Historical pctile',
   gaugeCaption:'Color shows where the rate sits within its own historical range — unrelated to the asset fear-color scale.',
+  rateNoteTag:'Historical context — not a prediction signal',
+  bondNote1:'A rapid rise in yields has historically compressed equity valuations — in 2022 the 10-year yield rose from 1.5% to 4.2% while the S&P fell 25% and the Nasdaq fell 33%; but gradual increases have coexisted with bull markets (2016–2018). For equities, the speed of a rate move has mattered more than its direction.',
+  bondNote2:'A sharp drop in yields has often signaled flight-to-safety rather than good news — the yield collapses of March 2020 and 2008 both coincided with steep equity selloffs; markets have often fallen before recovering in the early stage of a rate-cutting cycle.',
+  chinaNote1:'Consecutive LPR cuts mark an easing cycle, which has historically provided liquidity support for A-shares/Hong Kong stocks — but equities stayed weak through the 2022–2025 cutting stretch. Easing has been a necessary condition, not a sufficient one.',
+  chinaNote2:'Deposit rates falling to historic lows has pushed savings to search for yield elsewhere, a long-run tailwind for dividend assets and equities — but this process plays out over years.',
   chinaTitle:'China Rates',
   chinaHint:"The LPR (Loan Prime Rate) is published by the PBOC on the 20th of each month; data sourced from Eastmoney. This section is reference rate information — not part of the fear-percentile color system. Big-4 bank deposit rates are manually verified and maintained; see the update date noted below the table.",
   chinaCompare:(dep,comp)=>`1-year deposit <b>${dep.toFixed(2)}%</b> · Today's Global Fear Temperature <b>${fmt(comp)}</b>`,
@@ -722,12 +735,8 @@ function demo(){
   const bond_market={
     macro:{
       yield_curve_2s10s:{name:'2年/10年利差',note:'',neutral:false,date:composite.date,value:0.5,percentile:39.4,status:'normal'},
-      credit_spread:{name:'信用利差(Baa-10年美债)',note:'',neutral:false,date:composite.date,value:1.64,percentile:84.7},
-      move_index:{name:'MOVE指数',note:'',neutral:false,date:composite.date,value:73.4,percentile:59.9},
       yield_3m:{name:'3个月美债收益率',note:'≈短债理财/货币基金收益参考',neutral:true,date:composite.date,value:3.87,percentile:49.6,range_min:0.0,range_max:17.01},
-      yield_2y:{name:'2年期美债收益率',note:'',neutral:true,date:composite.date,value:4.19,percentile:44.9,range_min:0.09,range_max:16.95},
       yield_10y:{name:'10年期美债收益率',note:'',neutral:true,date:composite.date,value:4.69,percentile:42.8,range_min:0.52,range_max:15.84},
-      yield_30y:{name:'30年期美债收益率',note:'',neutral:true,date:composite.date,value:5.23,percentile:47.6,range_min:0.99,range_max:15.21},
     },
     divergence:{date:composite.date,composite:composite.value,tlt:tlt.latest.value,
                 value:Math.round((composite.value-tlt.latest.value)*10)/10},
@@ -1124,18 +1133,17 @@ function draw(){
 
   // 独立展示标的：同一套 panel() 渲染，单独一节、不进上面9个标的的分布/导航，
   // idx 接着主列表往后编号，避免 SVG 渐变 id（hb0/hb1...）在两节之间撞车。
-  // 目前只有 TLT，且单独走债市温度那一节（renderBondMarket），不在这里出现——
-  // 这一节会一直是空的、隐藏状态，除非以后又加了别的display_only标的。
+  // TLT 不在这里出现——它只用于美债利率一节的温差计算，不作为面板展示（2026-08-22 去掉了它的专属面板）。
   const extra=DATA.assets.filter(a=>a.display_only&&a.symbol!=='TLT');
   $('#panelsExtra').innerHTML='';
   $('#extraSection').hidden = extra.length===0;
   extra.forEach((a,i)=>panel(a,DATA.tiers,list.length+i,'panelsExtra'));
 
-  renderBondMarket(list.length+extra.length);
+  renderBondMarket();
   renderChinaRates();
 }
 
-/* ================= 债市温度 ================= */
+/* ================= 美债利率 ================= */
 function fmtEpisode(ep){
   const sm=ep.start.slice(0,7),em=ep.end.slice(0,7);
   return sm===em?sm:`${sm}~${em}`;
@@ -1147,10 +1155,9 @@ function bondTile(label,valueHtml,subHtml){
 }
 function macroName(key,m){return LANG==='en'?(MACRO_NAME_EN[key]||m.name):m.name;}
 function macroNote(key,m){return LANG==='en'?(MACRO_NOTE_EN[key]||''):m.note;}
-function renderBondMarket(nextIdx){
+function renderBondMarket(){
   const bm=DATA.bond_market,section=$('#bondSection');
-  const tlt=DATA.assets.find(a=>a.symbol==='TLT');
-  if(!bm||!tlt){section.hidden=true;return;}
+  if(!bm){section.hidden=true;return;}
   section.hidden=false;
   const t=T(),macro=bm.macro||{};
 
@@ -1162,18 +1169,6 @@ function renderBondMarket(nextIdx){
     grid.appendChild(bondTile(t.yieldCurveLabel,
       `<span style="color:${col}">${fmt(yc.percentile)}</span>`,
       t.curveSub(yc.value,statusText)));
-  }
-  const cs=macro.credit_spread;
-  if(cs){
-    const col=heat(cs.percentile);
-    grid.appendChild(bondTile(t.creditSpreadLabel,
-      `<span style="color:${col}">${fmt(cs.percentile)}</span>`,t.spreadSub(cs.value)));
-  }
-  const mv=macro.move_index;
-  if(mv){
-    const col=heat(mv.percentile);
-    grid.appendChild(bondTile(t.moveLabel,
-      `<span style="color:${col}">${fmt(mv.percentile)}</span>`,t.moveSub(mv.value)));
   }
 
   const dv=bm.divergence,dbox=$('#divergenceBox');
@@ -1193,14 +1188,11 @@ function renderBondMarket(nextIdx){
   }
 
   const ygrid=$('#yieldGrid');ygrid.innerHTML='';
-  ['yield_3m','yield_2y','yield_10y','yield_30y'].forEach(key=>{
+  ['yield_3m','yield_10y'].forEach(key=>{
     const m=macro[key];if(!m)return;
     ygrid.appendChild(gaugeTile(key,m));
   });
   $('#yieldCaption').textContent=t.gaugeCaption;
-
-  $('#tltPanelHost').innerHTML='';
-  panel(tlt,DATA.tiers,nextIdx,'tltPanelHost');
 }
 
 /* ================= 中国利率 ================= */
@@ -1300,8 +1292,10 @@ function paintChrome(){
   $('#extraHint').textContent=t.extraHint;
   $('#bondTitle').textContent=t.bondTitle;
   $('#bondHint').textContent=t.bondHint;
+  $('#bondNotes').innerHTML=`<div class="rn-tag">${t.rateNoteTag}</div><p>${t.bondNote1}</p><p>${t.bondNote2}</p>`;
   $('#chinaTitle').textContent=t.chinaTitle;
   $('#chinaHint').textContent=t.chinaHint;
+  $('#chinaNotes').innerHTML=`<div class="rn-tag">${t.rateNoteTag}</div><p>${t.chinaNote1}</p><p>${t.chinaNote2}</p>`;
   $('#sortBtn').textContent=byFear?t.sortOrig:t.sortFear;
   $('#langBtn').textContent=LANG==='zh'?'EN':'中';
   $('#themeBtn').textContent=THEME==='dark'?'☀':'☾';

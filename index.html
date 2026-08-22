@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="dark">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<!-- Safari 地址栏跟着页面变色，明暗各一套 -->
-<meta name="theme-color" content="#EAEEF1" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#101820" media="(prefers-color-scheme: dark)">
+<!-- Safari 地址栏跟着页面实际主题变色（JS 里同步），不是跟系统——
+     首次打开固定深色，用户手动切换后这个值也要跟着变，不然地址栏和
+     页面对不上 -->
+<meta name="theme-color" content="#101820" id="themeColorMeta">
 <!-- iOS 添加到主屏幕后全屏运行，没有 Safari 外壳 -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -128,11 +129,38 @@ h2{font-size:22px;font-weight:700;margin:0;letter-spacing:-.01em}
 #ribbon a:hover text{opacity:.55;text-decoration:underline}
 
 .panels{padding-bottom:60px}
+.band-extra{padding:8px 0 8px;border-top:2px solid var(--rule)}
+.band-extra h2{margin-bottom:16px}
+
+.bond-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px;margin-bottom:22px}
+.bond-tile{border:2px solid var(--rule);border-radius:12px;background:var(--card);padding:18px 20px}
+.bond-tile .bt-label{font-size:14.5px;font-weight:700;color:var(--ink2);margin-bottom:9px}
+.bond-tile .bt-num{font-family:var(--mono);font-weight:800;font-size:34px;line-height:1}
+.bond-tile .bt-sub{font-size:14px;color:var(--ink3);margin-top:8px;line-height:1.5}
+.bond-tile .bt-sub b{font-family:var(--mono);font-weight:700;color:var(--ink)}
+
+.divergence-box{border:2px solid var(--rule);border-radius:12px;background:var(--card);
+  padding:20px 22px;margin-bottom:24px}
+.divergence-box .dv-label{font-size:14.5px;font-weight:700;color:var(--ink2);margin-bottom:9px}
+.divergence-box .dv-num{font-family:var(--mono);font-weight:800;font-size:34px;line-height:1}
+.divergence-box .dv-formula{font-size:14px;color:var(--ink3);margin-top:8px}
+.divergence-box .dv-formula b{font-family:var(--mono);font-weight:700;color:var(--ink)}
+.divergence-box .dv-episodes{font-size:14.5px;color:var(--ink2);margin-top:14px;
+  padding-top:14px;border-top:1px solid var(--rule-soft);line-height:1.7}
+.divergence-box .dv-episodes b{font-family:var(--mono);font-weight:700;color:var(--ink)}
+
+.yield-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:28px}
+.yield-tile{border:2px solid var(--rule);border-radius:10px;background:var(--sunk);padding:14px 16px}
+.yield-tile .yt-label{font-size:13.5px;color:var(--ink3);margin-bottom:5px;font-weight:600}
+.yield-tile .yt-num{font-family:var(--mono);font-weight:700;font-size:22px;color:var(--ink)}
+.yield-tile .yt-pct{font-size:13px;color:var(--ink3);margin-top:4px}
+.yield-tile .yt-note{font-size:12.5px;color:var(--ink3);margin-top:6px;font-style:italic;line-height:1.4}
 .panel{scroll-margin-top:76px;border:2px solid var(--rule);border-left-width:7px;
   border-radius:12px;background:var(--card);margin-bottom:22px;overflow:hidden}
 .ptop{display:grid;grid-template-columns:1fr auto;gap:24px;padding:24px 26px 18px;align-items:start}
 .psym{font-family:var(--mono);font-size:15px;color:var(--ink3);margin:0 0 8px;letter-spacing:.06em}
 .pname{font-weight:700;font-size:30px;line-height:1.15;margin:0;letter-spacing:-.02em}
+.pname .star{color:var(--crown);font-size:.72em;vertical-align:.12em;margin-left:9px;cursor:default}
 .pprice{font-family:var(--mono);font-weight:700;font-size:24px;margin:12px 0 0;
   display:flex;align-items:center;gap:10px;flex-wrap:wrap;color:var(--ink)}
 .pprice em{font-style:normal;font-size:15px;color:var(--ink3);font-weight:500}
@@ -265,6 +293,21 @@ footer code{font-family:var(--mono);font-size:15px;color:var(--ink);background:v
 
   <section class="panels" id="panels"></section>
 
+  <section class="band-extra" id="bondSection" hidden>
+    <h2 id="bondTitle"></h2>
+    <p class="summary" id="bondHint"></p>
+    <div class="bond-grid" id="bondGrid"></div>
+    <div class="divergence-box" id="divergenceBox" hidden></div>
+    <div class="yield-grid" id="yieldGrid"></div>
+    <div id="tltPanelHost"></div>
+  </section>
+
+  <section class="band-extra" id="extraSection" hidden>
+    <h2 id="extraTitle"></h2>
+    <p class="summary" id="extraHint"></p>
+    <div class="panels" id="panelsExtra"></div>
+  </section>
+
   <footer id="footer"></footer>
 </div>
 <button id="top" type="button" aria-label="Top">↑</button>
@@ -290,8 +333,13 @@ function zoneOf(v,tiers){let h=null;for(const t of tiers)if(t.max!=null&&v<=t.ma
 const NAME_EN={'BTC-USD':'Bitcoin','GC=F':'Gold Futures','CL=F':'Crude Oil Futures',
  '^GSPC':'S&P 500','^STOXX50E':'Euro Stoxx 50','^NSEI':'Nifty 50','^N225':'Nikkei 225',
  '^HSI':'Hang Seng','000001.SS':'Shanghai Composite','AAPL':'Apple','MSFT':'Microsoft',
- 'GOOGL':'Alphabet','NVDA':'NVIDIA','AMZN':'Amazon','TSLA':'Tesla','TSM':'TSMC'};
+ 'GOOGL':'Alphabet','NVDA':'NVIDIA','AMZN':'Amazon','TSLA':'Tesla','TSM':'TSMC',
+ '^NDX':'Nasdaq 100','TLT':'20+ Year Treasury ETF'};
 const TIER_EN={'观察':'Watch','建仓':'Enter','加码':'Add','重仓':'Load up'};
+const MACRO_NAME_EN={yield_curve_2s10s:'2y/10y Spread',credit_spread:'Credit Spread (Baa–10y)',
+ move_index:'MOVE Index',yield_3m:'3-Month Yield',yield_2y:'2-Year Yield',
+ yield_10y:'10-Year Yield',yield_30y:'30-Year Yield'};
+const MACRO_NOTE_EN={yield_3m:'≈ short-term cash / money-market yield reference'};
 
 const I18N={
  zh:{brand:'一位比特国王',h1:'十六个全球市场<br>贪婪恐慌深度',
@@ -301,6 +349,22 @@ const I18N={
   compositeMeta:(d,pct)=>`16 个标的按权重合成 · ${d} 收盘${pct<100?` · 权重覆盖 ${pct}%`:''}`,
   compositeHint:'把16个标的的分位按 config.yaml 里的权重加权平均。某标的当天没有收盘价（跨市场假日不对齐）时，用它最近一次的读数顶替；某标的历史起点较晚导致当天权重覆盖不满100%时，按当天实际参与的权重重新归一化，不会把缺数据的标的当0分算。',
   dist:'当前分布',sortFear:'按恐慌程度排序',sortOrig:'按原顺序排列',
+  extraTitle:'独立观察标的',
+  extraHint:'算法跟上面16个标的完全一样，但不进综合指数权重，也不占建仓预算——纯展示，不参与系统的任何判断。',
+  coreStarTitle:'★ 主理人核心长期配置——这是个人观点标注，不是系统信号，跟档位/触发逻辑无关',
+  bondTitle:'债市温度',
+  bondHint:'TLT(20年期以上美债ETF)按跟其余标的一样的算法出恐慌分位；收益率曲线、信用利差、MOVE指数来自FRED/yfinance的宏观序列，各自算自己的历史展开百分位——不进综合指数，也是纯展示。',
+  yieldCurveLabel:'2年/10年利差',creditSpreadLabel:'信用利差',moveLabel:'MOVE指数',
+  curveNormal:'正常',curveInverted:'倒挂中',
+  curveSub:(v,s)=>`当前 <b>${v>=0?'+':''}${v.toFixed(2)}%</b> · ${s}`,
+  pctSub:v=>`历史分位 <b>${fmt(v)}</b>`,
+  spreadSub:v=>`当前 <b>${v.toFixed(2)}%</b>`,
+  moveSub:v=>`当前 <b>${v.toFixed(1)}</b>`,
+  divergenceLabel:'今日股债温差',
+  divergenceFormula:(c,t)=>`综合恐慌分位 <b>${fmt(c)}</b> − TLT恐慌分位 <b>${fmt(t)}</b>`,
+  divergenceEpisodes:'历史上两者同时进入恐慌区：',
+  divergenceNone:'历史上两者从未同时进入恐慌区',
+  yieldPctLabel:'历史分位',
   greed:'贪婪',fear:'恐慌',pct:'分位',copy:'复制概览',copied:'已复制',noTier:'不操作',deploy:'投 ',
   profTitle:'历史画像 · 按本标的自己的数据',times:'次',lastAt:'上次',
   never:'历史上从未到过',atHigh:'通常在高点附近',nextAt:(k,p)=>`进${k} ≈ ${p}`,
@@ -323,6 +387,7 @@ const I18N={
    '贪婪四档（1–4 级贪婪）<b>不是系统信号</b>——系统没有任何卖出逻辑。这四档已经用16个标的的全历史回测验证过：对长牛资产机械卖出的收益和风险调整后收益都显著跑输单纯持有，只有原油期货（CL=F）通过事件研究和全策略模拟的双重验证是例外，详见验证报告。阈值也不是恐慌档的镜像：纵轴刻意把恐慌端拉开了，镜像过去四条线会叠在一起。',
    '右侧徽章直接对应系统的四级恐慌档，百分比是该档要投的配额。但它只回答「当前读数落在哪一档」——<b>真正触发还要同时满足连续天数、BTC 的 AHR999 门槛，以及 30 日窗口和总量闸门</b>。系统没有卖出逻辑，所以没有卖出档，高位的「贵」由颜色表达。',
    '顶部「今日全球恐慌温度」是16个标的的分位按 config.yaml 权重加权合成，缺数据的标的用最近读数顶替、权重重新归一化，不代表任何一个单独市场。',
+   '<b style="color:var(--crown)">★ 金色星标</b>标在标的名字旁边，表示"主理人自己的核心长期配置"，是个人观点标注——<b>不是系统信号</b>，跟右侧的档位徽章、L1-L4 触发逻辑完全无关，不影响任何计算，纯粹告诉你我自己长期在拿哪几个标的。',
    '刷新数据：<code>python3 export_dashboard.py</code>，替换 <code>dashboard_data.json</code>。'],
   copyright:'© 2026 一位比特国王 · 保留所有权利。本站界面设计、图表实现与指标算法为原创作品，未经许可不得复制或用于商业用途。'},
  en:{brand:'One Bit King',h1:'Sixteen global markets<br>fear &amp; greed depth',
@@ -332,6 +397,22 @@ const I18N={
   compositeMeta:(d,pct)=>`Weighted across 16 assets · close ${d}${pct<100?` · weight coverage ${pct}%`:''}`,
   compositeHint:"Weighted average of all 16 assets' percentiles using config.yaml weights. If an asset has no close that day (exchange holidays don't line up), its last known reading carries forward; if an asset's history starts later so coverage is under 100%, weights are renormalized across whatever assets actually have data that day — missing assets are never scored as 0.",
   dist:'Current spread',sortFear:'Sort by fear',sortOrig:'Original order',
+  extraTitle:'Independent watch list',
+  extraHint:"Same methodology as the 16 assets above, but excluded from the composite index weight and the budget — display only, not part of any system decision.",
+  coreStarTitle:'★ Core long-term holding — a personal opinion marker, not a system signal, unrelated to the tier/trigger logic',
+  bondTitle:'Bond Market Temperature',
+  bondHint:"TLT (20+ Year Treasury ETF) gets a fear percentile the same way as every other asset. The yield curve, credit spread, and MOVE index are FRED/yfinance macro series, each with its own expanding historical percentile — excluded from the composite index, display only.",
+  yieldCurveLabel:'2y/10y Spread',creditSpreadLabel:'Credit Spread',moveLabel:'MOVE Index',
+  curveNormal:'Normal',curveInverted:'Inverted',
+  curveSub:(v,s)=>`Now <b>${v>=0?'+':''}${v.toFixed(2)}%</b> · ${s}`,
+  pctSub:v=>`Historical pctile <b>${fmt(v)}</b>`,
+  spreadSub:v=>`Now <b>${v.toFixed(2)}%</b>`,
+  moveSub:v=>`Now <b>${v.toFixed(1)}</b>`,
+  divergenceLabel:"Today's Stock-Bond Divergence",
+  divergenceFormula:(c,t)=>`Composite fear <b>${fmt(c)}</b> − TLT fear <b>${fmt(t)}</b>`,
+  divergenceEpisodes:'Historically both entered a fear zone together in:',
+  divergenceNone:'Both have never entered a fear zone at the same time',
+  yieldPctLabel:'Historical pctile',
   greed:'Greed',fear:'Fear',pct:'pctile',copy:'Copy summary',copied:'Copied',noTier:'No action',deploy:'',
   profTitle:'History — this asset’s own record',times:'×',lastAt:'last',
   never:'never reached',atHigh:'usually near highs',nextAt:(k,p)=>`${k} ≈ ${p}`,
@@ -354,6 +435,7 @@ const I18N={
    'The four greed levels are <b>not system signals</b> — the system has no sell logic. They have been backtested across all 16 assets’ full history: mechanically selling long-bull assets significantly underperforms simply holding, on both return and risk-adjusted return, with the sole exception of crude oil (CL=F), which passed double verification via event study and full-strategy simulation — see the validation report.',
    'The badge maps directly to the four system fear levels; the percentage is that tier’s allocation. It only answers which tier the current reading falls in — <b>actual triggering also requires the consecutive-day rule, the AHR999 gate, and the window and total budget throttles</b>. The system has no sell logic, so there are no sell tiers; expensive readings are conveyed by colour alone.',
    "The “Today's Global Fear Temperature” at the top is all 16 assets' percentiles weighted per config.yaml; assets missing data carry forward their last reading with weights renormalized, and it doesn't represent any single market.",
+   'A <b style="color:var(--crown)">★ gold star</b> next to an asset\'s name marks it as one of my own core long-term holdings — a personal opinion marker, <b>not a system signal</b>. It has nothing to do with the tier badges or the L1-L4 trigger logic and doesn\'t affect any calculation; it just tells you what I personally hold for the long run.',
    'Refresh: <code>python3 export_dashboard.py</code>, then replace <code>dashboard_data.json</code>.'],
   copyright:'© 2026 One Bit King · All rights reserved. The interface design, chart implementation and indicator methodology are original works.'}
 };
@@ -363,7 +445,7 @@ const nameOf=a => LANG==='en' ? (NAME_EN[a.symbol]||a.name) : a.name;
 const tierName=t => LANG==='en' ? (TIER_EN[t.name]||t.name) : t.name;
 
 /* ================= 主题与色带 ================= */
-let THEME = 'light';   // 首次打开固定浅色，深色由右上角按钮切换
+let THEME = 'dark';   // 首次打开固定深色，浅色由右上角按钮切换
 let CB = false;
 const RAMPS={
  light:{normal:[[0,'#05341F'],[12,'#0B4A30'],[25,'#17603C'],[40,'#42642C'],
@@ -481,9 +563,10 @@ function demo(){
     ['MSFT','微软','USD',37.8,417,''],['GOOGL','谷歌','USD',13.3,163,''],
     ['NVDA','英伟达','USD',41.9,118,''],['AMZN','亚马逊','USD',28.9,178,''],
     ['TSLA','特斯拉','USD',19.3,216,''],['TSM','台积电','USD',16.2,168,'']];
+  const extraDefs=[['^NDX','纳斯达克100','USD',38.4,20100,''],['TLT','20年期以上美债ETF','USD',33.8,82,'']];
   let s=20260821;const r=()=>{s=(s*1664525+1013904223)%4294967296;return s/4294967296;};
   const end=new Date('2026-08-20');
-  const assets=defs.map(([symbol,name,currency,fv,px,note])=>{
+  const buildAsset=([symbol,name,currency,fv,px,note],displayOnly=false)=>{
       const N=740,series=[];let v=48+r()*24,p=px*(0.4+r()*0.4);
       for(let i=0;i<N;i++){
         v=Math.max(.4,Math.min(99.6,v+(50-v)*.013+(r()-.5)*7));p*=1+(r()-.5)*.045;
@@ -503,22 +586,41 @@ function demo(){
         if(hit.length)prof[k]={episodes:Math.max(1,Math.round(hit.length/40)),
           days:hit.length,last:hit[hit.length-1].d,dd};
       });
-      return {symbol,name,currency,tradeable:'',note,weight:1/16,
+      return {symbol,name,currency,tradeable:'',note,weight:displayOnly?null:1/16,
+        display_only:displayOnly,
+        core:['BTC-USD','^GSPC','^NDX','GC=F'].includes(symbol),
         greed_confirmed:symbol==='CL=F',
         profile:prof,hi52,latest:{date:last.d,value:last.v,price:last.p},
         low:{date:lo.d,value:lo.v},series};
-    });
+    };
+  const assets=[...defs.map(d=>buildAsset(d)),...extraDefs.map(d=>buildAsset(d,true))];
+  const composite=demoComposite(assets);
+  const tlt=assets.find(a=>a.symbol==='TLT');
+  const bond_market={
+    macro:{
+      yield_curve_2s10s:{name:'2年/10年利差',note:'',neutral:false,date:composite.date,value:0.5,percentile:39.4,status:'normal'},
+      credit_spread:{name:'信用利差(Baa-10年美债)',note:'',neutral:false,date:composite.date,value:1.64,percentile:84.7},
+      move_index:{name:'MOVE指数',note:'',neutral:false,date:composite.date,value:73.4,percentile:59.9},
+      yield_3m:{name:'3个月美债收益率',note:'≈短债理财/货币基金收益参考',neutral:true,date:composite.date,value:3.87,percentile:49.6},
+      yield_2y:{name:'2年期美债收益率',note:'',neutral:true,date:composite.date,value:4.19,percentile:44.9},
+      yield_10y:{name:'10年期美债收益率',note:'',neutral:true,date:composite.date,value:4.69,percentile:42.8},
+      yield_30y:{name:'30年期美债收益率',note:'',neutral:true,date:composite.date,value:5.23,percentile:47.6},
+    },
+    divergence:{date:composite.date,composite:composite.value,tlt:tlt.latest.value,
+                value:Math.round((composite.value-tlt.latest.value)*10)/10},
+    simultaneous_fear_episodes:[{start:'2020-03-18',end:'2020-03-19'},{start:'2022-09-15',end:'2022-10-20'}],
+  };
   return {demo:true,generated_at:'2026-08-21T09:00:00',years:10,budget:2000,
     tiers:[{key:'L1',name:'观察',max:18,ratio:0},{key:'L2',name:'建仓',max:8,ratio:.2},
            {key:'L3',name:'加码',max:5,ratio:.3},{key:'L4',name:'重仓',max:2,ratio:.5}],
-    composite:demoComposite(assets),
+    composite,bond_market,
     assets};
 }
 // demo() 的 composite：16 个示例标的权重相等，直接按 d/日期对齐取平均即可，
 // 不需要真实数据里那套 forward-fill/权重归一化（示例数据本来就是逐日对齐生成的）。
 function demoComposite(assets){
   const byDate={};
-  assets.forEach(a=>a.series.forEach(s=>{(byDate[s.d]=byDate[s.d]||[]).push(s.v);}));
+  assets.filter(a=>!a.display_only).forEach(a=>a.series.forEach(s=>{(byDate[s.d]=byDate[s.d]||[]).push(s.v);}));
   const dates=Object.keys(byDate).sort();
   const rows=dates.map(d=>{
     const vs=byDate[d];
@@ -611,12 +713,12 @@ function ribbon(d,list){
     svg.appendChild(g);
   });
 
-  const sorted=[...d.assets].sort((a,b)=>a.latest.value-b.latest.value);
+  const sorted=[...list].sort((a,b)=>a.latest.value-b.latest.value);
   const inZ=sorted.filter(a=>zoneOf(a.latest.value,d.tiers));
   const dp=sorted[0],l1=bands[bands.length-1].max;
   $('#summary').innerHTML = inZ.length
-    ? T().inZone(d.assets.length,inZ.length,inZ.map(nameOf).join(LANG==='en'?', ':'、'),nameOf(dp),fmt(dp.latest.value))
-    : T().noZone(d.assets.length,nameOf(dp),fmt(dp.latest.value),fmt(l1-dp.latest.value),lvlFull(bands[bands.length-1].key));
+    ? T().inZone(list.length,inZ.length,inZ.map(nameOf).join(LANG==='en'?', ':'、'),nameOf(dp),fmt(dp.latest.value))
+    : T().noZone(list.length,nameOf(dp),fmt(dp.latest.value),fmt(l1-dp.latest.value),lvlFull(bands[bands.length-1].key));
 }
 
 /* 每档的历史画像：全部来自这个标的自己的数据。
@@ -638,7 +740,7 @@ function profileRows(a,tiers){
 }
 
 /* ================= 资产卡 ================= */
-function panel(a,tiers,idx){
+function panel(a,tiers,idx,containerId='panels'){
   const z=zoneOf(a.latest.value,tiers),c=heat(a.latest.value),n=a.series.length;
   const bands=tiers.filter(t=>t.max!=null).sort((x,y)=>y.max-x.max);
   const l1=bands[0].max;
@@ -658,7 +760,7 @@ function panel(a,tiers,idx){
     <div class="ptop">
       <div>
         <p class="psym">${a.symbol}</p>
-        <h3 class="pname">${nameOf(a)}</h3>
+        <h3 class="pname">${nameOf(a)}${a.core?`<span class="star" title="${T().coreStarTitle}">★</span>`:''}</h3>
         <p class="pprice" id="px-${idx}">${money(a.latest.price,a.currency)}<em>${a.currency}</em></p>
       </div>
       <div class="pright">
@@ -797,7 +899,7 @@ function panel(a,tiers,idx){
   if(a.greed_confirmed){
     const p=document.createElement('p');p.className='pnote-greed';p.textContent=T().clfNote;box.appendChild(p);
   }
-  $('#panels').appendChild(box);
+  document.getElementById(containerId).appendChild(box);
   startLive(a.symbol,box.querySelector(`#px-${idx}`),a.currency);
 
   if(!REDUCED){
@@ -824,18 +926,19 @@ function buildNav(list,tiers){
 /* ================= 复制概览 ================= */
 function summaryText(){
   const tiers=DATA.tiers;
-  const sorted=[...DATA.assets].sort((a,b)=>a.latest.value-b.latest.value);
+  const core=DATA.assets.filter(a=>!a.display_only);
+  const sorted=[...core].sort((a,b)=>a.latest.value-b.latest.value);
   const inZ=sorted.filter(a=>zoneOf(a.latest.value,tiers));
   const head=LANG==='en'
-    ? `One Bit King · Fear & Greed Depth · ${DATA.assets[0]?.latest.date}`
-    : `一位比特国王 · 贪婪恐慌深度 · ${DATA.assets[0]?.latest.date}`;
+    ? `One Bit King · Fear & Greed Depth · ${core[0]?.latest.date}`
+    : `一位比特国王 · 贪婪恐慌深度 · ${core[0]?.latest.date}`;
   const lines=sorted.slice(0,5).map(a=>{
     const z=zoneOf(a.latest.value,tiers);
     return `${nameOf(a)} ${fmt(a.latest.value)}${z?' '+z.key:''}`;
   });
   const tail=LANG==='en'
-    ? `${inZ.length}/${DATA.assets.length} in fear zone`
-    : `${DATA.assets.length} 个标的，${inZ.length} 个在恐慌区`;
+    ? `${inZ.length}/${core.length} in fear zone`
+    : `${core.length} 个标的，${inZ.length} 个在恐慌区`;
   return [head,tail,'',...lines].join('\n');
 }
 
@@ -867,7 +970,8 @@ function renderComposite(d){
 
 /* ================= 渲染 ================= */
 let DATA=null,byFear=true;   // 默认按恐慌程度排序
-const order=()=>byFear?[...DATA.assets].sort((a,b)=>a.latest.value-b.latest.value):DATA.assets;
+const coreAssets=()=>DATA.assets.filter(a=>!a.display_only);
+const order=()=>{const core=coreAssets();return byFear?core.sort((a,b)=>a.latest.value-b.latest.value):core;};
 function draw(){
   timers.splice(0).forEach(clearInterval);liveTicks.length=0;
   const list=order();
@@ -876,14 +980,102 @@ function draw(){
   buildNav(list,DATA.tiers);
   $('#panels').innerHTML='';
   list.forEach((a,i)=>panel(a,DATA.tiers,i));
+
+  // 独立展示标的（如 ^NDX）：同一套 panel() 渲染，单独一节、不进上面的16个标的分布/导航，
+  // idx 接着主列表往后编号，避免 SVG 渐变 id（hb0/hb1...）在两节之间撞车。
+  // TLT 单独走债市温度那一节（renderBondMarket），不在这里重复出现。
+  const extra=DATA.assets.filter(a=>a.display_only&&a.symbol!=='TLT');
+  $('#panelsExtra').innerHTML='';
+  $('#extraSection').hidden = extra.length===0;
+  extra.forEach((a,i)=>panel(a,DATA.tiers,list.length+i,'panelsExtra'));
+
+  renderBondMarket(list.length+extra.length);
+}
+
+/* ================= 债市温度 ================= */
+function fmtEpisode(ep){
+  const sm=ep.start.slice(0,7),em=ep.end.slice(0,7);
+  return sm===em?sm:`${sm}~${em}`;
+}
+function bondTile(label,valueHtml,subHtml){
+  const box=document.createElement('div');box.className='bond-tile';
+  box.innerHTML=`<div class="bt-label">${label}</div><div class="bt-num">${valueHtml}</div><div class="bt-sub">${subHtml}</div>`;
+  return box;
+}
+function macroName(key,m){return LANG==='en'?(MACRO_NAME_EN[key]||m.name):m.name;}
+function macroNote(key,m){return LANG==='en'?(MACRO_NOTE_EN[key]||''):m.note;}
+function renderBondMarket(nextIdx){
+  const bm=DATA.bond_market,section=$('#bondSection');
+  const tlt=DATA.assets.find(a=>a.symbol==='TLT');
+  if(!bm||!tlt){section.hidden=true;return;}
+  section.hidden=false;
+  const t=T(),macro=bm.macro||{};
+
+  const grid=$('#bondGrid');grid.innerHTML='';
+  const yc=macro.yield_curve_2s10s;
+  if(yc){
+    const col=heat(yc.percentile);
+    const statusText=yc.status==='inverted'?t.curveInverted:t.curveNormal;
+    grid.appendChild(bondTile(t.yieldCurveLabel,
+      `<span style="color:${col}">${fmt(yc.percentile)}</span>`,
+      t.curveSub(yc.value,statusText)));
+  }
+  const cs=macro.credit_spread;
+  if(cs){
+    const col=heat(cs.percentile);
+    grid.appendChild(bondTile(t.creditSpreadLabel,
+      `<span style="color:${col}">${fmt(cs.percentile)}</span>`,t.spreadSub(cs.value)));
+  }
+  const mv=macro.move_index;
+  if(mv){
+    const col=heat(mv.percentile);
+    grid.appendChild(bondTile(t.moveLabel,
+      `<span style="color:${col}">${fmt(mv.percentile)}</span>`,t.moveSub(mv.value)));
+  }
+
+  const dv=bm.divergence,dbox=$('#divergenceBox');
+  if(dv){
+    dbox.hidden=false;
+    const col=heat(50+dv.value/2); // 温差本身不是0-100分位，仅借热力渐变的中段色调做视觉提示
+    const episodes=bm.simultaneous_fear_episodes||[];
+    const epHtml=episodes.length
+      ? `<div class="dv-episodes">${t.divergenceEpisodes} <b>${episodes.map(fmtEpisode).join(' · ')}</b></div>`
+      : `<div class="dv-episodes">${t.divergenceNone}</div>`;
+    dbox.innerHTML=`<div class="dv-label">${t.divergenceLabel}</div>
+      <div class="dv-num" style="color:${col}">${dv.value>=0?'+':''}${fmt(dv.value)}</div>
+      <div class="dv-formula">${t.divergenceFormula(dv.composite,dv.tlt)}</div>
+      ${epHtml}`;
+  }else{
+    dbox.hidden=true;
+  }
+
+  const ygrid=$('#yieldGrid');ygrid.innerHTML='';
+  ['yield_3m','yield_2y','yield_10y','yield_30y'].forEach(key=>{
+    const m=macro[key];if(!m)return;
+    const box=document.createElement('div');box.className='yield-tile';
+    const note=macroNote(key,m);
+    box.innerHTML=`<div class="yt-label">${macroName(key,m)}</div>
+      <div class="yt-num">${m.value.toFixed(2)}%</div>
+      <div class="yt-pct">${t.yieldPctLabel} ${fmt(m.percentile)}</div>
+      ${note?`<div class="yt-note">${note}</div>`:''}`;
+    ygrid.appendChild(box);
+  });
+
+  $('#tltPanelHost').innerHTML='';
+  panel(tlt,DATA.tiers,nextIdx,'tltPanelHost');
 }
 function paintChrome(){
   const t=T();
   document.documentElement.lang = LANG==='zh'?'zh-CN':'en';
   document.documentElement.dataset.theme = THEME;
+  $('#themeColorMeta').content = THEME==='dark' ? '#101820' : '#EAEEF1';
   $('#brandName').textContent=t.brand;
   $('#h1').innerHTML=t.h1;
   $('#distTitle').textContent=t.dist;
+  $('#extraTitle').textContent=t.extraTitle;
+  $('#extraHint').textContent=t.extraHint;
+  $('#bondTitle').textContent=t.bondTitle;
+  $('#bondHint').textContent=t.bondHint;
   $('#sortBtn').textContent=byFear?t.sortOrig:t.sortFear;
   $('#langBtn').textContent=LANG==='zh'?'EN':'中';
   $('#themeBtn').textContent=THEME==='dark'?'☀':'☾';

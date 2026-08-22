@@ -327,6 +327,12 @@ footer code{font-family:var(--mono);font-size:15px;color:var(--ink);background:v
     <div id="tltPanelHost"></div>
   </section>
 
+  <section class="band-extra" id="extraSection" hidden>
+    <h2 id="extraTitle"></h2>
+    <p class="summary" id="extraHint"></p>
+    <div class="panels" id="panelsExtra"></div>
+  </section>
+
   <section class="band-extra" id="chinaSection" hidden>
     <h2 id="chinaTitle"></h2>
     <p class="summary" id="chinaHint"></p>
@@ -340,12 +346,6 @@ footer code{font-family:var(--mono);font-size:15px;color:var(--ink);background:v
       <table class="china-table" id="chinaTable"></table>
     </div>
     <p class="china-asof" id="chinaAsOf"></p>
-  </section>
-
-  <section class="band-extra" id="extraSection" hidden>
-    <h2 id="extraTitle"></h2>
-    <p class="summary" id="extraHint"></p>
-    <div class="panels" id="panelsExtra"></div>
   </section>
 
   <footer id="footer"></footer>
@@ -409,7 +409,7 @@ const I18N={
   divergenceNone:'历史上两者从未同时进入恐慌区',
   yieldPctLabel:'历史分位',
   chinaTitle:'中国利率',
-  chinaHint:'LPR(贷款市场报价利率)人行每月20日发布，数据来自东方财富——shibor.org(LPR真正的官方发布方)这台机器连不上，pbc.gov.cn没有结构化接口，改用这个持牌大型财经数据商，跟其余宏观序列一样只是展示，不接恐慌配色。四大行存款利率是手工维护的静态表，不做爬虫。',
+  chinaHint:'LPR(贷款市场报价利率)由央行每月20日发布，数据来自东方财富。本区块为利率参考信息，不接入恐慌分位配色体系。四大行存款利率为人工核对维护，更新日期见表下标注。',
   chinaCompare:(dep,comp)=>`1年定存 <b>${dep.toFixed(2)}%</b> · 今日全球恐慌温度 <b>${fmt(comp)}</b>`,
   chinaAsOf:d=>`截至 ${d}，人工维护`,
   bankCol:'银行',demandCol:'活期',m3Col:'3个月',y1Col:'1年',y3Col:'3年',y5Col:'5年',
@@ -463,7 +463,7 @@ const I18N={
   divergenceNone:'Both have never entered a fear zone at the same time',
   yieldPctLabel:'Historical pctile',
   chinaTitle:'China Rates',
-  chinaHint:"LPR (Loan Prime Rate) is published by the PBOC on the 20th of each month; data sourced from Eastmoney — shibor.org (LPR's actual official publisher) is unreachable from this machine and pbc.gov.cn has no structured feed, so this licensed data vendor is used instead. Display only, same as the other macro series — no fear-color coding. The big-4 bank deposit rate table is a manually maintained static table, not scraped.",
+  chinaHint:"The LPR (Loan Prime Rate) is published by the PBOC on the 20th of each month; data sourced from Eastmoney. This section is reference rate information — not part of the fear-percentile color system. Big-4 bank deposit rates are manually verified and maintained; see the update date noted below the table.",
   chinaCompare:(dep,comp)=>`1-year deposit <b>${dep.toFixed(2)}%</b> · Today's Global Fear Temperature <b>${fmt(comp)}</b>`,
   chinaAsOf:d=>`As of ${d}, manually maintained`,
   bankCol:'Bank',demandCol:'Demand',m3Col:'3-Month',y1Col:'1-Year',y3Col:'3-Year',y5Col:'5-Year',

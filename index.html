@@ -15,7 +15,7 @@
 <link rel="icon" href="favicon.png" sizes="32x32">
 <link rel="manifest" href="site.webmanifest">
 <title>一位比特国王 · 贪婪恐慌深度</title>
-<meta name="description" content="十六个全球市场的贪婪恐慌深度。越绿越便宜，越红越贵。">
+<meta name="description" content="9个全球市场的贪婪恐慌深度。越绿越便宜，越红越贵。">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
@@ -72,6 +72,8 @@ body{margin:0;background:var(--paper);color:var(--ink);
 header{padding:40px 0 34px}
 h1{font-weight:800;font-size:clamp(36px,5.4vw,62px);line-height:1.09;
    letter-spacing:-.025em;margin:0}
+.h1-sub{font-size:clamp(17px,2vw,21px);font-weight:600;color:var(--ink2);
+  margin:14px 0 0;letter-spacing:-.005em}
 .scale{margin-top:32px;max-width:580px}
 .scale-bar{height:14px;border-radius:7px;border:1px solid var(--rule)}
 .scale-ends{display:flex;justify-content:space-between;gap:12px;margin-top:9px;
@@ -95,7 +97,7 @@ h1{font-weight:800;font-size:clamp(36px,5.4vw,62px);line-height:1.09;
 .notice{margin-top:22px;background:var(--warnbg);border:2px solid var(--warnbd);
   color:var(--warnfg);padding:14px 18px;border-radius:8px;font-size:16.5px;font-weight:500}
 
-/* 吸顶导航：16 个色块，滚到哪儿都能一键跳 */
+/* 吸顶导航：9 个色块，滚到哪儿都能一键跳 */
 .navbar{
   position:sticky;top:0;z-index:15;
   background:color-mix(in srgb, var(--paper) 82%, transparent);
@@ -149,12 +151,17 @@ h2{font-size:22px;font-weight:700;margin:0;letter-spacing:-.01em}
   padding-top:14px;border-top:1px solid var(--rule-soft);line-height:1.7}
 .divergence-box .dv-episodes b{font-family:var(--mono);font-weight:700;color:var(--ink)}
 
-.yield-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:28px}
+.yield-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:10px}
 .yield-tile{border:2px solid var(--rule);border-radius:10px;background:var(--sunk);padding:14px 16px}
-.yield-tile .yt-label{font-size:13.5px;color:var(--ink3);margin-bottom:5px;font-weight:600}
+.yield-tile .yt-label{font-size:13.5px;color:var(--ink3);margin-bottom:2px;font-weight:600}
 .yield-tile .yt-num{font-family:var(--mono);font-weight:700;font-size:22px;color:var(--ink)}
-.yield-tile .yt-pct{font-size:13px;color:var(--ink3);margin-top:4px}
+.yield-tile .yt-pct{font-size:13px;color:var(--ink3);margin-top:2px}
 .yield-tile .yt-note{font-size:12.5px;color:var(--ink3);margin-top:6px;font-style:italic;line-height:1.4}
+.yield-tile .yt-gauge{width:100%;margin:6px 0 0}
+.yield-tile .yt-gauge svg{width:100%;height:auto;display:block;overflow:visible}
+.yield-tile .yt-range{display:flex;justify-content:space-between;font-size:11px;
+  color:var(--ink3);font-family:var(--mono);margin-top:0}
+.gauge-caption{font-size:12.5px;color:var(--ink3);margin:0 0 22px;font-style:italic;line-height:1.5}
 
 .lpr-chart-host{margin:0 0 26px;border:2px solid var(--rule);border-radius:12px;
   background:var(--card);padding:18px 20px 12px}
@@ -222,7 +229,6 @@ html[data-theme="dark"] .disc{color:#101820}
 .prof .est{font-family:var(--mono);font-weight:700;color:var(--ink);white-space:nowrap}
 .prof .miss{color:var(--ink3)}
 .pnote{margin:0;padding:0 26px 20px;font-size:15.5px;color:var(--ink3);line-height:1.6;max-width:74ch}
-.pnote-greed{margin:0;padding:0 26px 20px;font-size:15.5px;color:var(--crown);font-weight:600;line-height:1.6;max-width:74ch}
 
 .tip{position:absolute;pointer-events:none;opacity:0;transition:opacity .1s;
   background:var(--tipbg);color:var(--tipfg);border-radius:8px;padding:12px 16px;
@@ -239,8 +245,9 @@ html[data-theme="dark"] .disc{color:#101820}
 #top:hover{border-color:var(--ink);color:var(--ink)}
 #top.show{display:flex}
 
-footer{border-top:2px solid var(--rule);padding:36px 0 90px;color:var(--ink2);font-size:16.5px}
-footer p{max-width:64ch;margin:0 0 14px;line-height:1.65}
+footer{border-top:2px solid var(--rule);padding:36px 0 90px;color:var(--ink2);
+  font-size:16.5px;text-align:center}
+footer p{max-width:64ch;margin:0 auto 14px;line-height:1.65}
 footer code{font-family:var(--mono);font-size:15px;color:var(--ink);background:var(--sunk);padding:2px 7px;border-radius:4px}
 .copyright{margin-top:24px;font-size:15px;color:var(--ink3)}
 
@@ -291,6 +298,7 @@ footer code{font-family:var(--mono);font-size:15px;color:var(--ink);background:v
 
   <header>
     <h1 id="h1"></h1>
+    <p class="h1-sub" id="h1Sub"></p>
     <div class="composite" id="composite" hidden title="">
       <div class="composite-main">
         <span class="composite-label" id="cLabel"></span>
@@ -324,6 +332,7 @@ footer code{font-family:var(--mono);font-size:15px;color:var(--ink);background:v
     <div class="bond-grid" id="bondGrid"></div>
     <div class="divergence-box" id="divergenceBox" hidden></div>
     <div class="yield-grid" id="yieldGrid"></div>
+    <p class="gauge-caption" id="yieldCaption"></p>
     <div id="tltPanelHost"></div>
   </section>
 
@@ -337,6 +346,7 @@ footer code{font-family:var(--mono);font-size:15px;color:var(--ink);background:v
     <h2 id="chinaTitle"></h2>
     <p class="summary" id="chinaHint"></p>
     <div class="yield-grid" id="lprGrid"></div>
+    <p class="gauge-caption" id="lprCaption"></p>
     <div class="lpr-chart-host">
       <div class="lpr-legend" id="lprLegend"></div>
       <svg id="lprChart" viewBox="0 0 1000 260" role="img"></svg>
@@ -385,15 +395,15 @@ const MACRO_NOTE_EN={yield_3m:'≈ short-term cash / money-market yield referenc
 const BANK_NAME_EN={'工商银行':'ICBC','建设银行':'CCB','农业银行':'ABC','中国银行':'BOC'};
 
 const I18N={
- zh:{brand:'一位比特国王',h1:'十六个全球市场<br>贪婪恐慌深度',
+ zh:{brand:'一位比特国王',h1:'全球优质资产配置',h1Sub:'9 个全球市场的贪婪恐慌深度',
   scaleLo:'越绿 · 越恐慌 · 越便宜',scaleHi:'越红 · 越贪婪 · 越贵',
   scaleLoCB:'越蓝 · 越恐慌 · 越便宜',scaleHiCB:'越橙 · 越贪婪 · 越贵',
   compositeLabel:'今日全球恐慌温度',
-  compositeMeta:(d,pct)=>`16 个标的按权重合成 · ${d} 收盘${pct<100?` · 权重覆盖 ${pct}%`:''}`,
-  compositeHint:'把16个标的的分位按 config.yaml 里的权重加权平均。某标的当天没有收盘价（跨市场假日不对齐）时，用它最近一次的读数顶替；某标的历史起点较晚导致当天权重覆盖不满100%时，按当天实际参与的权重重新归一化，不会把缺数据的标的当0分算。',
+  compositeMeta:(d,pct)=>`9 个标的按权重合成 · ${d} 收盘${pct<100?` · 权重覆盖 ${pct}%`:''}`,
+  compositeHint:'把9个标的的分位按 config.yaml 里的权重加权平均。某标的当天没有收盘价（跨市场假日不对齐）时，用它最近一次的读数顶替；某标的历史起点较晚导致当天权重覆盖不满100%时，按当天实际参与的权重重新归一化，不会把缺数据的标的当0分算。',
   dist:'当前分布',sortFear:'按恐慌程度排序',sortOrig:'按原顺序排列',
   extraTitle:'独立观察标的',
-  extraHint:'算法跟上面16个标的完全一样，但不进综合指数权重，也不占建仓预算——纯展示，不参与系统的任何判断。',
+  extraHint:'算法跟上面9个标的完全一样，但不进综合指数权重，也不占建仓预算——纯展示，不参与系统的任何判断。',
   coreStarTitle:'★ 主理人核心长期配置——这是个人观点标注，不是系统信号，跟档位/触发逻辑无关',
   bondTitle:'债市温度',
   bondHint:'TLT(20年期以上美债ETF)按跟其余标的一样的算法出恐慌分位；收益率曲线、信用利差、MOVE指数来自FRED/yfinance的宏观序列，各自算自己的历史展开百分位——不进综合指数，也是纯展示。',
@@ -408,6 +418,7 @@ const I18N={
   divergenceEpisodes:'历史上两者同时进入恐慌区：',
   divergenceNone:'历史上两者从未同时进入恐慌区',
   yieldPctLabel:'历史分位',
+  gaugeCaption:'颜色表示利率在自身历史区间的位置，与资产恐慌色带无关。',
   chinaTitle:'中国利率',
   chinaHint:'LPR(贷款市场报价利率)由央行每月20日发布，数据来自东方财富。本区块为利率参考信息，不接入恐慌分位配色体系。四大行存款利率为人工核对维护，更新日期见表下标注。',
   chinaCompare:(dep,comp)=>`1年定存 <b>${dep.toFixed(2)}%</b> · 今日全球恐慌温度 <b>${fmt(comp)}</b>`,
@@ -419,7 +430,6 @@ const I18N={
   never:'历史上从未到过',atHigh:'通常在高点附近',nextAt:(k,p)=>`进${k} ≈ ${p}`,
   adviceHint:'当前读数落在哪一档。实际触发还需满足连续天数、AHR999 门槛和资金闸门',
   greedHint:'贪婪档为情绪参考，不是卖出信号。回测显示对长牛资产机械卖出显著跑输持有，详见验证报告',
-  clfNote:'该标的贪婪三档经回测双重验证（事件研究 + 全策略模拟 + 阈值±5稳健性），详见验证报告',
   cbOn:'色盲模式',cbOff:'常规配色',
   demo:'正在显示示例数据。把 dashboard_data.json 放在同一目录，并用本地服务器打开。',
   stale:(d,n)=>`数据停在 ${d}，已经 ${n} 天没更新了。重新跑一次 export_dashboard.py 再看。`,
@@ -433,21 +443,22 @@ const I18N={
    '比特币价格每 30 秒刷新。其余标的没有可直接调用的实时行情，显示最近一个交易日收盘价。',
    '<b>分位一律按收盘价计算，不随盘中价格变动。</b>五个指标和连续天数判定都建立在收盘价上。',
    '纵轴用平方根刻度，四条档位线才拉得开。价格轴取对数。指数按本币计价，未做汇率换算。',
-   '贪婪四档（1–4 级贪婪）<b>不是系统信号</b>——系统没有任何卖出逻辑。这四档已经用16个标的的全历史回测验证过：对长牛资产机械卖出的收益和风险调整后收益都显著跑输单纯持有，只有原油期货（CL=F）通过事件研究和全策略模拟的双重验证是例外，详见验证报告。阈值也不是恐慌档的镜像：纵轴刻意把恐慌端拉开了，镜像过去四条线会叠在一起。',
+   '贪婪四档（1–4 级贪婪）<b>不是系统信号</b>——系统没有任何卖出逻辑。这四档已经用9个标的的全历史回测验证过：对长牛资产机械卖出的收益和风险调整后收益都显著跑输单纯持有，没有例外，详见验证报告。阈值也不是恐慌档的镜像：纵轴刻意把恐慌端拉开了，镜像过去四条线会叠在一起。',
    '右侧徽章直接对应系统的四级恐慌档，百分比是该档要投的配额。但它只回答「当前读数落在哪一档」——<b>真正触发还要同时满足连续天数、BTC 的 AHR999 门槛，以及 30 日窗口和总量闸门</b>。系统没有卖出逻辑，所以没有卖出档，高位的「贵」由颜色表达。',
-   '顶部「今日全球恐慌温度」是16个标的的分位按 config.yaml 权重加权合成，缺数据的标的用最近读数顶替、权重重新归一化，不代表任何一个单独市场。',
+   '顶部「今日全球恐慌温度」是9个标的的分位按 config.yaml 权重加权合成，缺数据的标的用最近读数顶替、权重重新归一化，不代表任何一个单独市场。',
    '<b style="color:var(--crown)">★ 金色星标</b>标在标的名字旁边，表示"主理人自己的核心长期配置"，是个人观点标注——<b>不是系统信号</b>，跟右侧的档位徽章、L1-L4 触发逻辑完全无关，不影响任何计算，纯粹告诉你我自己长期在拿哪几个标的。',
+   '口径 v2（2026-08-22）：标的由 16 调整为 9。',
    '刷新数据：<code>python3 export_dashboard.py</code>，替换 <code>dashboard_data.json</code>。'],
   copyright:'© 2026 一位比特国王 · 保留所有权利。本站界面设计、图表实现与指标算法为原创作品，未经许可不得复制或用于商业用途。'},
- en:{brand:'One Bit King',h1:'Sixteen global markets<br>fear &amp; greed depth',
+ en:{brand:'One Bit King',h1:'Global Quality Portfolio',h1Sub:'Fear &amp; greed depth across 9 global markets',
   scaleLo:'Greener · more fear · cheaper',scaleHi:'Redder · more greed · pricier',
   scaleLoCB:'Bluer · more fear · cheaper',scaleHiCB:'More orange · more greed · pricier',
   compositeLabel:"Today's Global Fear Temperature",
-  compositeMeta:(d,pct)=>`Weighted across 16 assets · close ${d}${pct<100?` · weight coverage ${pct}%`:''}`,
-  compositeHint:"Weighted average of all 16 assets' percentiles using config.yaml weights. If an asset has no close that day (exchange holidays don't line up), its last known reading carries forward; if an asset's history starts later so coverage is under 100%, weights are renormalized across whatever assets actually have data that day — missing assets are never scored as 0.",
+  compositeMeta:(d,pct)=>`Weighted across 9 assets · close ${d}${pct<100?` · weight coverage ${pct}%`:''}`,
+  compositeHint:"Weighted average of all 9 assets' percentiles using config.yaml weights. If an asset has no close that day (exchange holidays don't line up), its last known reading carries forward; if an asset's history starts later so coverage is under 100%, weights are renormalized across whatever assets actually have data that day — missing assets are never scored as 0.",
   dist:'Current spread',sortFear:'Sort by fear',sortOrig:'Original order',
   extraTitle:'Independent watch list',
-  extraHint:"Same methodology as the 16 assets above, but excluded from the composite index weight and the budget — display only, not part of any system decision.",
+  extraHint:"Same methodology as the 9 assets above, but excluded from the composite index weight and the budget — display only, not part of any system decision.",
   coreStarTitle:'★ Core long-term holding — a personal opinion marker, not a system signal, unrelated to the tier/trigger logic',
   bondTitle:'Bond Market Temperature',
   bondHint:"TLT (20+ Year Treasury ETF) gets a fear percentile the same way as every other asset. The yield curve, credit spread, and MOVE index are FRED/yfinance macro series, each with its own expanding historical percentile — excluded from the composite index, display only.",
@@ -462,6 +473,7 @@ const I18N={
   divergenceEpisodes:'Historically both entered a fear zone together in:',
   divergenceNone:'Both have never entered a fear zone at the same time',
   yieldPctLabel:'Historical pctile',
+  gaugeCaption:'Color shows where the rate sits within its own historical range — unrelated to the asset fear-color scale.',
   chinaTitle:'China Rates',
   chinaHint:"The LPR (Loan Prime Rate) is published by the PBOC on the 20th of each month; data sourced from Eastmoney. This section is reference rate information — not part of the fear-percentile color system. Big-4 bank deposit rates are manually verified and maintained; see the update date noted below the table.",
   chinaCompare:(dep,comp)=>`1-year deposit <b>${dep.toFixed(2)}%</b> · Today's Global Fear Temperature <b>${fmt(comp)}</b>`,
@@ -473,7 +485,6 @@ const I18N={
   never:'never reached',atHigh:'usually near highs',nextAt:(k,p)=>`${k} ≈ ${p}`,
   adviceHint:'Which tier the current reading falls in. Actual triggering also needs the consecutive-day rule, the AHR999 gate and the budget throttles.',
   greedHint:'Greed tiers are sentiment reference, not a sell signal. Backtesting shows mechanically selling long-bull assets significantly underperforms holding — see the validation report.',
-  clfNote:'This asset’s three greed tiers passed double verification (event study + full-strategy simulation + ±5 threshold robustness) — see the validation report.',
   cbOn:'Colorblind',cbOff:'Standard',
   demo:'Showing sample data. Put dashboard_data.json in the same folder and open via a local server.',
   stale:(d,n)=>`Data stops at ${d}, ${n} days stale. Re-run export_dashboard.py.`,
@@ -487,10 +498,11 @@ const I18N={
    'Bitcoin price refreshes every 30s. The others have no directly callable live feed, so the last close is shown.',
    '<b>Percentiles always use closing prices</b> — the five indicators and the consecutive-day rules are all built on closes.',
    'Vertical axis is square-root scaled so the four tier lines separate. Price axis is logarithmic. Indices are in local currency, not FX-converted.',
-   'The four greed levels are <b>not system signals</b> — the system has no sell logic. They have been backtested across all 16 assets’ full history: mechanically selling long-bull assets significantly underperforms simply holding, on both return and risk-adjusted return, with the sole exception of crude oil (CL=F), which passed double verification via event study and full-strategy simulation — see the validation report.',
+   'The four greed levels are <b>not system signals</b> — the system has no sell logic. They have been backtested across all 9 assets’ full history: mechanically selling long-bull assets significantly underperforms simply holding, on both return and risk-adjusted return, with no exception — see the validation report.',
    'The badge maps directly to the four system fear levels; the percentage is that tier’s allocation. It only answers which tier the current reading falls in — <b>actual triggering also requires the consecutive-day rule, the AHR999 gate, and the window and total budget throttles</b>. The system has no sell logic, so there are no sell tiers; expensive readings are conveyed by colour alone.',
-   "The “Today's Global Fear Temperature” at the top is all 16 assets' percentiles weighted per config.yaml; assets missing data carry forward their last reading with weights renormalized, and it doesn't represent any single market.",
+   "The “Today's Global Fear Temperature” at the top is all 9 assets' percentiles weighted per config.yaml; assets missing data carry forward their last reading with weights renormalized, and it doesn't represent any single market.",
    'A <b style="color:var(--crown)">★ gold star</b> next to an asset\'s name marks it as one of my own core long-term holdings — a personal opinion marker, <b>not a system signal</b>. It has nothing to do with the tier badges or the L1-L4 trigger logic and doesn\'t affect any calculation; it just tells you what I personally hold for the long run.',
+   'Methodology v2 (2026-08-22): the asset roster was reduced from 16 to 9.',
    'Refresh: <code>python3 export_dashboard.py</code>, then replace <code>dashboard_data.json</code>.'],
   copyright:'© 2026 One Bit King · All rights reserved. The interface design, chart implementation and indicator methodology are original works.'}
 };
@@ -524,6 +536,66 @@ function heat(v){
     }
   }
   return R[R.length-1][1];
+}
+
+/* ================= 极简利率仪表盘 =================
+   跟heat()是两个独立的配色系统：heat()是"分位在0-100恐慌/贪婪刻度上的位置"，
+   这里是"当前值在这条序列自己历史min-max区间里的线性位置"——用途不同，特意不复用
+   同一套断点表，只借ramp()的两个端点色，保证深浅主题/色盲模式能跟着站内既有配色走，
+   不用维护第二套配色表。 */
+function gaugeColor(frac){
+  frac=Math.max(0,Math.min(1,frac));
+  const R=ramp(),a=hex2rgb(R[0][1]),b=hex2rgb(R[R.length-1][1]);
+  return `rgb(${a.map((x,k)=>Math.round(x+(b[k]-x)*frac)).join(',')})`;
+}
+function gaugeSvg(value,lo,hi){
+  const W=200,H=118,cx=100,cy=104,r=82,rNeedle=66;
+  const frac=(hi>lo)?Math.max(0,Math.min(1,(value-lo)/(hi-lo))):0.5;
+  const svg=el('svg',{viewBox:`0 0 ${W} ${H}`,role:'img'});
+  const gid='gg'+Math.random().toString(36).slice(2,9);
+  const defs=el('defs');
+  const lg=el('linearGradient',{id:gid,x1:'0',y1:'0',x2:'1',y2:'0'});
+  const R=ramp();
+  lg.appendChild(el('stop',{offset:'0%','stop-color':R[0][1]}));
+  lg.appendChild(el('stop',{offset:'100%','stop-color':R[R.length-1][1]}));
+  defs.appendChild(lg);svg.appendChild(defs);
+
+  // 背景弧：半圆，从左(180°)经过顶部到右(0°)
+  svg.appendChild(el('path',{d:`M${cx-r},${cy} A${r},${r} 0 0 1 ${cx+r},${cy}`,
+    fill:'none',stroke:`url(#${gid})`,'stroke-width':11,'stroke-linecap':'round',opacity:.9}));
+
+  const angle=Math.PI*(1-frac);
+  const nx=cx+rNeedle*Math.cos(angle),ny=cy-rNeedle*Math.sin(angle);
+  const col=gaugeColor(frac);
+  svg.appendChild(el('line',{x1:cx,y1:cy,x2:nx,y2:ny,stroke:V('--ink'),
+    'stroke-width':3,'stroke-linecap':'round'}));
+  svg.appendChild(el('circle',{cx:nx,cy:ny,r:5,fill:col}));
+  svg.appendChild(el('circle',{cx,cy,r:6,fill:V('--ink')}));
+  return svg;
+}
+function gaugeTile(key,m){
+  const box=document.createElement('div');box.className='yield-tile';
+  const note=macroNote(key,m);
+  box.innerHTML=`<div class="yt-label">${macroName(key,m)}</div>
+    <div class="yt-num">${m.value.toFixed(2)}%</div>`;
+  if(m.range_min!=null&&m.range_max!=null){
+    const gaugeHost=document.createElement('div');gaugeHost.className='yt-gauge';
+    gaugeHost.appendChild(gaugeSvg(m.value,m.range_min,m.range_max));
+    box.appendChild(gaugeHost);
+    const range=document.createElement('div');range.className='yt-range';
+    range.innerHTML=`<span>${m.range_min.toFixed(2)}%</span><span>${m.range_max.toFixed(2)}%</span>`;
+    box.appendChild(range);
+  }
+  if(m.percentile!=null){
+    const pct=document.createElement('div');pct.className='yt-pct';
+    pct.textContent=`${T().yieldPctLabel} ${fmt(m.percentile)}`;
+    box.appendChild(pct);
+  }
+  if(note){
+    const n=document.createElement('div');n.className='yt-note';n.textContent=note;
+    box.appendChild(n);
+  }
+  return box;
 }
 
 /* 档位显示名：L1 最浅、L4 最深，数字越大越恐慌 */
@@ -611,14 +683,11 @@ function lastInZone(series,l1){
 /* ================= 示例数据 ================= */
 function demo(){
   const defs=[['BTC-USD','比特币','USD',59.9,68400,''],['GC=F','黄金期货','USD',43.6,2410,'前月连续合约，换月日有价格跳空'],
-    ['CL=F','原油期货','USD',25.0,71.4,'前月连续合约，换月日有价格跳空'],['^GSPC','标普500','USD',56.9,5630,''],
+    ['^GSPC','标普500','USD',56.9,5630,''],['^NDX','纳斯达克100','USD',48.4,20100,''],
     ['^STOXX50E','欧洲斯托克50','EUR',77.1,4980,''],['^NSEI','印度Nifty50','INR',37.8,24100,''],
     ['^N225','日经225','JPY',37.3,38200,''],['^HSI','恒生指数','HKD',67.8,17600,''],
-    ['000001.SS','上证指数','CNY',44.0,2890,''],['AAPL','苹果','USD',35.4,224,''],
-    ['MSFT','微软','USD',37.8,417,''],['GOOGL','谷歌','USD',13.3,163,''],
-    ['NVDA','英伟达','USD',41.9,118,''],['AMZN','亚马逊','USD',28.9,178,''],
-    ['TSLA','特斯拉','USD',19.3,216,''],['TSM','台积电','USD',16.2,168,'']];
-  const extraDefs=[['^NDX','纳斯达克100','USD',38.4,20100,''],['TLT','20年期以上美债ETF','USD',33.8,82,'']];
+    ['000001.SS','上证指数','CNY',44.0,2890,'']];
+  const extraDefs=[['TLT','20年期以上美债ETF','USD',33.8,82,'']];
   let s=20260821;const r=()=>{s=(s*1664525+1013904223)%4294967296;return s/4294967296;};
   const end=new Date('2026-08-20');
   const buildAsset=([symbol,name,currency,fv,px,note],displayOnly=false)=>{
@@ -641,10 +710,9 @@ function demo(){
         if(hit.length)prof[k]={episodes:Math.max(1,Math.round(hit.length/40)),
           days:hit.length,last:hit[hit.length-1].d,dd};
       });
-      return {symbol,name,currency,tradeable:'',note,weight:displayOnly?null:1/16,
+      return {symbol,name,currency,tradeable:'',note,weight:displayOnly?null:1/9,
         display_only:displayOnly,
         core:['BTC-USD','^GSPC','^NDX','GC=F'].includes(symbol),
-        greed_confirmed:symbol==='CL=F',
         profile:prof,hi52,latest:{date:last.d,value:last.v,price:last.p},
         low:{date:lo.d,value:lo.v},series};
     };
@@ -656,10 +724,10 @@ function demo(){
       yield_curve_2s10s:{name:'2年/10年利差',note:'',neutral:false,date:composite.date,value:0.5,percentile:39.4,status:'normal'},
       credit_spread:{name:'信用利差(Baa-10年美债)',note:'',neutral:false,date:composite.date,value:1.64,percentile:84.7},
       move_index:{name:'MOVE指数',note:'',neutral:false,date:composite.date,value:73.4,percentile:59.9},
-      yield_3m:{name:'3个月美债收益率',note:'≈短债理财/货币基金收益参考',neutral:true,date:composite.date,value:3.87,percentile:49.6},
-      yield_2y:{name:'2年期美债收益率',note:'',neutral:true,date:composite.date,value:4.19,percentile:44.9},
-      yield_10y:{name:'10年期美债收益率',note:'',neutral:true,date:composite.date,value:4.69,percentile:42.8},
-      yield_30y:{name:'30年期美债收益率',note:'',neutral:true,date:composite.date,value:5.23,percentile:47.6},
+      yield_3m:{name:'3个月美债收益率',note:'≈短债理财/货币基金收益参考',neutral:true,date:composite.date,value:3.87,percentile:49.6,range_min:0.0,range_max:17.01},
+      yield_2y:{name:'2年期美债收益率',note:'',neutral:true,date:composite.date,value:4.19,percentile:44.9,range_min:0.09,range_max:16.95},
+      yield_10y:{name:'10年期美债收益率',note:'',neutral:true,date:composite.date,value:4.69,percentile:42.8,range_min:0.52,range_max:15.84},
+      yield_30y:{name:'30年期美债收益率',note:'',neutral:true,date:composite.date,value:5.23,percentile:47.6,range_min:0.99,range_max:15.21},
     },
     divergence:{date:composite.date,composite:composite.value,tlt:tlt.latest.value,
                 value:Math.round((composite.value-tlt.latest.value)*10)/10},
@@ -668,9 +736,11 @@ function demo(){
   const china_rates={
     lpr:{
       lpr_1y:{name:'LPR 1年期',note:'≈企业贷款利率定价基准',neutral:true,date:composite.date,value:3.0,
+        range_min:3.0,range_max:5.77,
         series:[{d:'2019-08-20',v:4.25},{d:'2020-04-20',v:3.85},{d:'2022-08-22',v:3.65},
                 {d:'2023-08-21',v:3.45},{d:'2024-07-22',v:3.35},{d:'2025-05-20',v:3.0},{d:composite.date,v:3.0}]},
       lpr_5y:{name:'LPR 5年期以上',note:'≈房贷利率定价基准',neutral:true,date:composite.date,value:3.5,
+        range_min:3.5,range_max:4.85,
         series:[{d:'2019-08-20',v:4.85},{d:'2020-04-20',v:4.65},{d:'2022-08-22',v:4.3},
                 {d:'2023-08-21',v:4.2},{d:'2024-07-22',v:3.85},{d:'2025-05-20',v:3.5},{d:composite.date,v:3.5}]},
     },
@@ -690,7 +760,7 @@ function demo(){
     composite,bond_market,china_rates,
     assets};
 }
-// demo() 的 composite：16 个示例标的权重相等，直接按 d/日期对齐取平均即可，
+// demo() 的 composite：9 个示例标的权重相等，直接按 d/日期对齐取平均即可，
 // 不需要真实数据里那套 forward-fill/权重归一化（示例数据本来就是逐日对齐生成的）。
 function demoComposite(assets){
   const byDate={};
@@ -970,9 +1040,6 @@ function panel(a,tiers,idx,containerId='panels'){
   if(a.note&&LANG==='zh'){
     const p=document.createElement('p');p.className='pnote';p.textContent=a.note;box.appendChild(p);
   }
-  if(a.greed_confirmed){
-    const p=document.createElement('p');p.className='pnote-greed';p.textContent=T().clfNote;box.appendChild(p);
-  }
   document.getElementById(containerId).appendChild(box);
   startLive(a.symbol,box.querySelector(`#px-${idx}`),a.currency);
 
@@ -1055,9 +1122,10 @@ function draw(){
   $('#panels').innerHTML='';
   list.forEach((a,i)=>panel(a,DATA.tiers,i));
 
-  // 独立展示标的（如 ^NDX）：同一套 panel() 渲染，单独一节、不进上面的16个标的分布/导航，
+  // 独立展示标的：同一套 panel() 渲染，单独一节、不进上面9个标的的分布/导航，
   // idx 接着主列表往后编号，避免 SVG 渐变 id（hb0/hb1...）在两节之间撞车。
-  // TLT 单独走债市温度那一节（renderBondMarket），不在这里重复出现。
+  // 目前只有 TLT，且单独走债市温度那一节（renderBondMarket），不在这里出现——
+  // 这一节会一直是空的、隐藏状态，除非以后又加了别的display_only标的。
   const extra=DATA.assets.filter(a=>a.display_only&&a.symbol!=='TLT');
   $('#panelsExtra').innerHTML='';
   $('#extraSection').hidden = extra.length===0;
@@ -1127,14 +1195,9 @@ function renderBondMarket(nextIdx){
   const ygrid=$('#yieldGrid');ygrid.innerHTML='';
   ['yield_3m','yield_2y','yield_10y','yield_30y'].forEach(key=>{
     const m=macro[key];if(!m)return;
-    const box=document.createElement('div');box.className='yield-tile';
-    const note=macroNote(key,m);
-    box.innerHTML=`<div class="yt-label">${macroName(key,m)}</div>
-      <div class="yt-num">${m.value.toFixed(2)}%</div>
-      <div class="yt-pct">${t.yieldPctLabel} ${fmt(m.percentile)}</div>
-      ${note?`<div class="yt-note">${note}</div>`:''}`;
-    ygrid.appendChild(box);
+    ygrid.appendChild(gaugeTile(key,m));
   });
+  $('#yieldCaption').textContent=t.gaugeCaption;
 
   $('#tltPanelHost').innerHTML='';
   panel(tlt,DATA.tiers,nextIdx,'tltPanelHost');
@@ -1160,13 +1223,9 @@ function renderChinaRates(){
   const grid=$('#lprGrid');grid.innerHTML='';
   ['lpr_1y','lpr_5y'].forEach(key=>{
     const m=lpr[key];if(!m)return;
-    const box=document.createElement('div');box.className='yield-tile';
-    const note=macroNote(key,m);
-    box.innerHTML=`<div class="yt-label">${macroName(key,m)}</div>
-      <div class="yt-num">${m.value.toFixed(2)}%</div>
-      ${note?`<div class="yt-note">${note}</div>`:''}`;
-    grid.appendChild(box);
+    grid.appendChild(gaugeTile(key,m));
   });
+  $('#lprCaption').textContent=t.gaugeCaption;
 
   const svg=$('#lprChart');svg.innerHTML='';
   const series1=(lpr.lpr_1y||{}).series||[],series5=(lpr.lpr_5y||{}).series||[];
@@ -1235,6 +1294,7 @@ function paintChrome(){
   $('#themeColorMeta').content = THEME==='dark' ? '#101820' : '#EAEEF1';
   $('#brandName').textContent=t.brand;
   $('#h1').innerHTML=t.h1;
+  $('#h1Sub').innerHTML=t.h1Sub;
   $('#distTitle').textContent=t.dist;
   $('#extraTitle').textContent=t.extraTitle;
   $('#extraHint').textContent=t.extraHint;

@@ -442,7 +442,8 @@ const I18N={
   greedHint:'贪婪档为情绪参考，不是卖出信号。回测显示对长牛资产机械卖出显著跑输持有，详见验证报告',
   cbOn:'色盲模式',cbOff:'常规配色',
   demo:'正在显示示例数据。把 dashboard_data.json 放在同一目录，并用本地服务器打开。',
-  stale:(d,n)=>`数据停在 ${d}，已经 ${n} 天没更新了。重新跑一次 export_dashboard.py 再看。`,
+  staleWarn:h=>`⚠️ 数据已经 ${h} 小时没更新了，系统可能出了问题。`,
+  staleCrit:h=>`🔴 数据已经 ${h} 小时没更新了，系统很可能已经停止运行，需要检查。`,
   inZone:(t,n,names,dn,dv)=>`${t} 个标的里，<b>${n}</b> 个已经跌进恐慌区：${names}。最恐慌的是 <b>${dn}</b>，分位 <b>${dv}</b>。`,
   noZone:(t,dn,dv,gap,l1)=>`${t} 个标的都还没跌进恐慌区。最接近的是 <b>${dn}</b>，分位 <b>${dv}</b>，离 ${l1} 还差 <b>${gap}</b>。`,
   gapTo:(k,g)=>`离 ${k} 还差 <b>${g}</b>`,already:k=>`已在 <b>${k}</b> 区内`,
@@ -500,7 +501,8 @@ const I18N={
   greedHint:'Greed tiers are sentiment reference, not a sell signal. Backtesting shows mechanically selling long-bull assets significantly underperforms holding — see the validation report.',
   cbOn:'Colorblind',cbOff:'Standard',
   demo:'Showing sample data. Put dashboard_data.json in the same folder and open via a local server.',
-  stale:(d,n)=>`Data stops at ${d}, ${n} days stale. Re-run export_dashboard.py.`,
+  staleWarn:h=>`⚠️ Data hasn't updated in ${h}h — the pipeline may be having trouble.`,
+  staleCrit:h=>`🔴 Data hasn't updated in ${h}h — the pipeline has likely stopped and needs attention.`,
   inZone:(t,n,names,dn,dv)=>`<b>${n}</b> of ${t} assets are in a fear zone: ${names}. Most fearful is <b>${dn}</b> at <b>${dv}</b>.`,
   noZone:(t,dn,dv,gap,l1)=>`None of the ${t} assets are in a fear zone. Closest is <b>${dn}</b> at <b>${dv}</b>, <b>${gap}</b> above ${l1}.`,
   gapTo:(k,g)=>`<b>${g}</b> above ${k}`,already:k=>`In <b>${k}</b>`,
@@ -1311,11 +1313,30 @@ function paintChrome(){
   $('#demoBanner').textContent=t.demo;
   $('#footer').innerHTML=t.foot.map(p=>`<p>${p}</p>`).join('')
     +`<p class="copyright">${t.copyright}</p>`;
-  if(DATA&&!DATA.demo){
-    const last=DATA.assets[0]?.latest.date;
-    const days=last?Math.floor((Date.now()-new Date(last+'T00:00:00'))/864e5):0;
-    $('#stale').hidden = days<=4;
-    if(days>4)$('#stale').textContent=t.stale(last,days);
+  if(DATA&&!DATA.demo&&DATA.generated_at){
+    // 用 generated_at(整条流水线最后一次成功跑完的时间)判断系统死活，不用某个
+    // 标的的 latest.date——后者受各地交易所收盘时间影响，非美/欧标的在美股开盘前
+    // 天然就会显示"昨天"的日期，那是正常现象，不是系统故障，拿它当健康信号会
+    // 每天误报。服务端(export_dashboard.py)写的是不带时区的北京时间本地时间，
+    // 显式补上 +08:00，否则海外访客的浏览器会按自己的本地时区错误解读这个时间戳。
+    const genMs=Date.parse(DATA.generated_at+'+08:00');
+    const ageH=Math.floor((Date.now()-genMs)/36e5);
+    const staleEl=$('#stale');
+    if(ageH>48){
+      staleEl.hidden=false;
+      staleEl.textContent=t.staleCrit(ageH);
+      staleEl.style.borderColor=heat(100);
+      staleEl.style.color=heat(100);
+    }else if(ageH>24){
+      staleEl.hidden=false;
+      staleEl.textContent=t.staleWarn(ageH);
+      staleEl.style.borderColor=heat(65);
+      staleEl.style.color=heat(65);
+    }else{
+      staleEl.hidden=true;
+      staleEl.style.borderColor='';
+      staleEl.style.color='';
+    }
   }
 }
 function render(d){

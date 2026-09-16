@@ -521,7 +521,13 @@ const I18N={
    'Refresh: <code>python3 export_dashboard.py</code>, then replace <code>dashboard_data.json</code>.'],
   copyright:'© 2026 One Bit King · All rights reserved. The interface design, chart implementation and indicator methodology are original works.'}
 };
-let LANG = (navigator.language||'zh').toLowerCase().startsWith('zh') ? 'zh' : 'en';
+/* 语言偏好：本地有存过的选择(手动切换过)就用那个，不再按浏览器语言判断；
+   否则(首次访问)按浏览器语言自动选——中文浏览器给中文，其它一律给英文。
+   隐私模式/存储被禁用时 localStorage 读写会抛异常，吞掉即可，退化成"每次都按浏览器语言判断"。 */
+const LANG_KEY='obk_lang';
+function _readStoredLang(){try{return localStorage.getItem(LANG_KEY);}catch(e){return null;}}
+function _storeLang(v){try{localStorage.setItem(LANG_KEY,v);}catch(e){}}
+let LANG = _readStoredLang() || ((navigator.language||'zh').toLowerCase().startsWith('zh') ? 'zh' : 'en');
 const T=()=>I18N[LANG];
 const nameOf=a => LANG==='en' ? (NAME_EN[a.symbol]||a.name) : a.name;
 const tierName=t => LANG==='en' ? (TIER_EN[t.name]||t.name) : t.name;
@@ -1346,7 +1352,7 @@ function render(d){
   draw();
 }
 
-$('#langBtn').onclick=()=>{LANG=LANG==='zh'?'en':'zh';paintChrome();draw();};
+$('#langBtn').onclick=()=>{LANG=LANG==='zh'?'en':'zh';_storeLang(LANG);paintChrome();draw();};
 $('#themeBtn').onclick=()=>{THEME=THEME==='dark'?'light':'dark';paintChrome();draw();};
 $('#cbBtn').onclick=()=>{CB=!CB;paintChrome();draw();};
 $('#sortBtn').onclick=()=>{byFear=!byFear;paintChrome();draw();};

@@ -1,0 +1,44 @@
+# Reconstructed config for the clean-room rebuild of onebitking.com's data pipeline.
+# Values taken from the live dashboard_data.json (2026-10-10) + Claude export transcripts.
+# NOT the original ~/tether-monitor/config.yaml (that file was never in the export).
+budget: 1000
+years: 10
+max_points: 900
+min_history_days_for_scoring: 1260
+assets:
+  - {symbol: BTC-USD,   name: 比特币,       weight: 0.20, core: true,  currency: USD, tradeable: "现货BTC，或 IBIT/FBTC 等比特币现货ETF"}
+  - {symbol: GC=F,      name: 黄金期货,     weight: 0.15, core: true,  currency: USD, tradeable: "GLD / IAU 黄金ETF",
+     note: "黄金期货为前月连续合约，换月日会有价格跳空，可能被20日动量/波动率误读为真实价格变动，仅供参考"}
+  - {symbol: ^GSPC,     name: 标普500,      weight: 0.20, core: true,  currency: USD, tradeable: "VOO / SPY"}
+  - {symbol: ^NDX,      name: 纳斯达克100,  weight: 0.10, core: true,  currency: USD, tradeable: "QQQ"}
+  - {symbol: ^STOXX50E, name: 欧洲斯托克50, weight: 0.07, currency: EUR, tradeable: "FEZ (SPDR EURO STOXX 50 ETF)", sina: "欧洲Stoxx50指数"}
+  - {symbol: ^NSEI,     name: 印度Nifty50,  weight: 0.07, currency: INR, tradeable: "INDA / EPI 印度ETF"}
+  - {symbol: ^N225,     name: 日经225,      weight: 0.07, currency: JPY, tradeable: "EWJ / DXJ 日本ETF", sina: "日经225指数"}
+  - {symbol: ^HSI,      name: 恒生指数,     weight: 0.07, currency: HKD, tradeable: "2800.HK 盈富基金 / EWH", sina_hk: HSI}
+  - {symbol: 000001.SS, name: 上证指数,     weight: 0.07, currency: CNY, tradeable: "ASHR（跟踪CSI300，非上证综指本身，近似代理）", sina_cn: sh000001}
+  - {symbol: TLT,       name: 20年期以上美债ETF, weight: null, display_only: true, currency: USD, tradeable: "TLT"}
+tiers:   # fear tiers (fear_percentile <= max). Thresholds as shown on the live site.
+  - {key: L1, name: 观察, max: 18, ratio: 0.0, consecutive_days: 2}
+  - {key: L2, name: 建仓, max: 8,  ratio: 0.2, consecutive_days: 3}
+  - {key: L3, name: 加码, max: 5,  ratio: 0.3, consecutive_days: 4}
+  - {key: L4, name: 重仓, max: 2,  ratio: 0.5, consecutive_days: 3}
+reset: {above: 50, days: 30}      # tier state resets after fp > 50 for 30 days
+external_index:                    # optional 30/70 blend (alternative.me works; CNN blocks bots)
+  enabled: true
+  blend_weight_external: 0.30
+fred_series:
+  yield_curve_2s10s: {id: T10Y2Y, name: 2年/10年利差}
+  credit_spread:     {id: BAA10Y, name: 信用利差(Baa-10年美债), invert: true}
+  yield_3m:  {id: DGS3MO, name: 3个月美债收益率, neutral: true, note: "≈短债理财/货币基金收益参考"}
+  yield_2y:  {id: DGS2,   name: 2年期美债收益率, neutral: true}
+  yield_10y: {id: DGS10,  name: 10年期美债收益率, neutral: true}
+  yield_30y: {id: DGS30,  name: 30年期美债收益率, neutral: true}
+# MANUALLY MAINTAINED: big-4 bank personal deposit rates (% p.a.). Last checked 2026-08-22.
+# Update when a bank announces a change (last change: May 2025 notices below).
+bank_rates:
+  as_of: "2026-08-22"
+  banks:
+    - {name: 工商银行, source: "https://www.icbc.com.cn/page/1098160857085153280.html", demand: 0.05, m3: 0.65, y1: 0.95, y3: 1.25, y5: 1.30}
+    - {name: 建设银行, source: "https://www.ccb.com/chn/2025-05/19/article_2025051920012020670.shtml", demand: 0.05, m3: 0.65, y1: 0.95, y3: 1.25, y5: 1.30}
+    - {name: 农业银行, source: "https://www.abchina.com/cn/PersonalServices/SvcBulletin/202505/t20250519_2445034.htm", demand: 0.05, m3: 0.65, y1: 0.95, y3: 1.25, y5: 1.30}
+    - {name: 中国银行, source: "https://www.bankofchina.com/fimarkets/lilv/fd31/202505/t20250520_25356440.html", demand: 0.05, m3: 0.65, y1: 0.95, y3: 1.25, y5: 1.30}

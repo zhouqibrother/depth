@@ -1,0 +1,57 @@
+# Rebuilds dashboard_data.json at 08:30 and 16:30 Asia/Shanghai, and on
+# workflow_dispatch. Uses the built-in GITHUB_TOKEN; no deploy key or secret.
+#
+# The build script replaces dashboard_data.json only after the document validates.
+# A refused or crashed build exits non-zero, so this job never reaches the commit
+# step and cannot push a partial file. changed.py then exits 2 when the only
+# difference is generated_at, and the job stops without a commit.
+name: update-dashboard
+on:
+  schedule:
+    - cron: "30 0 * * *"    # 08:30 Asia/Shanghai
+    - cron: "30 8 * * *"    # 16:30 Asia/Shanghai
+  workflow_dispatch: {}
+permissions:
+  contents: write
+concurrency:
+  group: update-dashboard
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: rebuild/requirements.txt
+      - run: python -m pip install -r rebuild/requirements.txt
+      - name: Build dashboard_data.json
+        run: python rebuild/build_dashboard.py --config rebuild/config.yaml --out dashboard_data.json --health rebuild/health.json
+      - name: Commit if data changed
+        run: |
+          set -euo pipefail
+          # 0 = data changed, 2 = unchanged, anything else = do not commit
+          set +e
+          python rebuild/changed.py
+          rc=$?
+          set -e
+          if [ "$rc" -eq 2 ]; then
+            echo "no meaningful change"
+            exit 0
+          fi
+          if [ "$rc" -ne 0 ]; then
+            echo "changed.py failed (rc=$rc); not committing"
+            exit "$rc"
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- dashboard_data.json rebuild/health.json
+          if git diff --cached --quiet; then
+            echo "nothing staged"
+            exit 0
+          fi
+          git commit -m "Auto-update dashboard data $(TZ=Asia/Shanghai date '+%Y-%m-%d %H:%M')"
+          git push

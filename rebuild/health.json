@@ -1,7 +1,7 @@
 {
  "alternative.me": "ok (last 2026-10-31)",
  "BTC-USD": "ok (yahoo, last 2026-10-31, 0d old)",
- "ahr999": 0.449,
+ "ahr999": 0.451,
  "GC=F": "ok (yahoo, last 2026-10-30, 1d old)",
  "^GSPC": "ok (yahoo, last 2026-10-30, 1d old)",
  "^NDX": "ok (yahoo, last 2026-10-30, 1d old)",
@@ -17,9 +17,9 @@
  "FRED DGS2": "failed: skipped after DGS10 failed",
  "FRED DGS10": "failed: HTTPSConnectionPool(host='fred.stlouisfed.org', port=443): Read timed out. (read timeout=12)",
  "FRED DGS30": "failed: skipped after DGS10 failed",
- "rates": "ok (Treasury.gov, {\"yield_curve_2s10s\": \"2026-10-30\", \"move_index\": \"2026-10-30\", \"yield_3m\": \"2026-10-30\", \"yield_2y\": \"2026-10-30\", \"yield_10y\": \"2026-10-30\", \"yield_30y\": \"2026-10-30\"})",
+ "rates": "ok (H.15+Treasury, {\"yield_curve_2s10s\": \"2026-10-30\", \"move_index\": \"2026-10-30\", \"yield_3m\": \"2026-10-30\", \"yield_2y\": \"2026-10-30\", \"yield_10y\": \"2026-10-30\", \"yield_30y\": \"2026-10-30\"})",
  "^MOVE": "ok (yahoo, last 2026-10-30)",
  "LPR (akshare/Eastmoney)": "ok (last 2026-10-20)",
- "composite": "2026-10-31 22.314 coverage 1.0",
+ "composite": "2026-10-31 22.366 coverage 1.0",
  "published": true
 }

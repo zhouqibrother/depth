@@ -1,7 +1,7 @@
 {
- "alternative.me": "ok (last 2026-11-21)",
- "BTC-USD": "ok (yahoo, last 2026-11-21, 1d old)",
- "ahr999": 0.267,
+ "alternative.me": "ok (last 2026-11-22)",
+ "BTC-USD": "ok (yahoo, last 2026-11-22, 0d old)",
+ "ahr999": 0.261,
  "GC=F": "ok (yahoo, last 2026-11-20, 2d old)",
  "^GSPC": "ok (yahoo, last 2026-11-20, 2d old)",
  "^NDX": "ok (yahoo, last 2026-11-20, 2d old)",
@@ -20,6 +20,6 @@
  "rates": "ok (H.15+Treasury, {\"yield_curve_2s10s\": \"2026-11-20\", \"move_index\": \"2026-11-20\", \"yield_3m\": \"2026-11-20\", \"yield_2y\": \"2026-11-20\", \"yield_10y\": \"2026-11-20\", \"yield_30y\": \"2026-11-20\"})",
  "^MOVE": "ok (yahoo, last 2026-11-20)",
  "LPR (akshare/Eastmoney)": "ok (last 2026-11-20)",
- "composite": "2026-11-21 11.545 coverage 1.0",
+ "composite": "2026-11-22 11.442 coverage 1.0",
  "published": true
 }

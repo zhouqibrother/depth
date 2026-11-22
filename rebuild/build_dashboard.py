@@ -16,6 +16,11 @@ Bank deposit rates are the static block in config.yaml.
 The output file is replaced only after it validates. A run with fewer than
 6 of the 9 weighted assets, or with a required section missing, leaves the
 existing dashboard_data.json untouched and exits non-zero.
+
+Bitcoin also gets btc_intraday: the same depth scored as if the session low
+or the live price were today's close. That block is a warning. It is omitted
+rather than failing the run when the intraday sources are down, and it never
+changes the close-based latest value, tier, or thresholds.
 """
 import argparse
 import io
@@ -860,6 +865,34 @@ def atomic_json(path, obj, pretty=False):
         raise
 
 
+def publish_intraday(payload, btc_close, fng, cfg, out_path):
+    """Attach the BTC warning. A failure keeps the previous block, if it still validates."""
+    import intraday
+
+    tiers = intraday.tiers_from(cfg)
+    try:
+        if btc_close is None:
+            raise RuntimeError("no BTC close series")
+        block = intraday.compute_block(
+            btc_close,
+            fng,
+            tiers,
+            intraday.official_from_payload(payload),
+            intraday.blend_weight(cfg),
+            cfg.get("min_history_days_for_scoring", 1260),
+            datetime.now(CST),
+        )
+        log("  intraday", json.dumps(intraday.summary(block), ensure_ascii=False))
+        return block
+    except Exception as e:
+        log(f"! intraday: {e}")
+        prev = intraday.read_previous(out_path)
+        if prev and not intraday.problems(prev, tiers):
+            log("  intraday: keeping the previous block")
+            return prev
+        return None
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--config", default=os.path.join(os.path.dirname(__file__), "config.yaml"))
@@ -893,6 +926,7 @@ def main():
                 log(f"! alternative.me: {e}")
 
         fps, out_assets, failures = {}, [], {}
+        btc_close = None
         for asset in cfg["assets"]:
             sym = asset["symbol"]
             try:
@@ -912,6 +946,7 @@ def main():
                 health[sym] = f"ok ({src}, last {ymd(close.index[-1])}, {age}d old)"
                 log(f"  {sym:<12} {src:<16} last {ymd(close.index[-1])}  fp={built['latest']['value']:7.2f}")
                 if sym == "BTC-USD":
+                    btc_close = close
                     try:
                         ahr = float(ahr999(close).dropna().iloc[-1])
                         if math.isfinite(ahr):
@@ -979,6 +1014,15 @@ def main():
         "bond_market": bond,
         "china_rates": china,
     }
+    intraday_block = publish_intraday(payload, btc_close, fng, cfg, args.out)
+    if intraday_block:
+        payload["btc_intraday"] = intraday_block
+        health["btc_intraday"] = (
+            f"{intraday_block['as_of']} session {intraday_block['session_date']} "
+            f"value {intraday_block['value']} active {intraday_block['active']}"
+        )
+    else:
+        health["btc_intraday"] = "missing"
     problems = validate(payload, weighted_have, len(weighted_symbols))
     if failures:
         detail = "; ".join(f"{sym}: {msg}" for sym, msg in failures.items())

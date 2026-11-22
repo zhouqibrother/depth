@@ -1,0 +1,62 @@
+# Refreshes only btc_intraday. The nine-market close rebuild stays on
+# update.yml (08:30 and 16:30 Asia/Shanghai).
+#
+# GitHub's scheduler has been starting that twice-daily job about 6–10 hours
+# late. This hourly job is the published snapshot; the page also rescores the
+# embedded model from Coinbase as soon as it loads, so a wick does not have to
+# wait for the scheduler. Minute 17 avoids the top-of-hour queue.
+#
+# One Yahoo daily history, one alternative.me print, one Coinbase candle.
+# No secrets. update_intraday.py refuses to write if any official field would
+# change, and a failed run leaves dashboard_data.json untouched.
+name: update-intraday
+on:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch: {}
+permissions:
+  contents: write
+concurrency:
+  group: update-dashboard
+  cancel-in-progress: false
+jobs:
+  intraday:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: rebuild/requirements.txt
+      - name: Install the light dependencies
+        run: python -m pip install pandas==3.1.0 numpy==2.5.4 requests==2.34.2 PyYAML==6.0.1
+      - name: Refresh the Bitcoin intraday block
+        run: python rebuild/update_intraday.py --config rebuild/config.yaml --dashboard dashboard_data.json
+      - name: Commit if the intraday block changed
+        run: |
+          set -euo pipefail
+          set +e
+          python rebuild/changed.py
+          rc=$?
+          set -e
+          if [ "$rc" -eq 2 ]; then
+            echo "no meaningful change"
+            exit 0
+          fi
+          if [ "$rc" -ne 0 ]; then
+            echo "changed.py failed (rc=$rc); not committing"
+            exit "$rc"
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- dashboard_data.json
+          if git diff --cached --quiet; then
+            echo "nothing staged"
+            exit 0
+          fi
+          git commit -m "Auto-update Bitcoin intraday warning $(TZ=Asia/Shanghai date '+%Y-%m-%d %H:%M')"
+          # Shared concurrency group with the twice-daily rebuild. If main
+          # still moved, rebase this one commit and push once more.
+          git push || { git pull --rebase origin main && git push; }

@@ -1,5 +1,7 @@
 # Rebuilds dashboard_data.json at 08:30 and 16:30 Asia/Shanghai, and on
 # workflow_dispatch. Uses the built-in GITHUB_TOKEN; no deploy key or secret.
+# The Bitcoin intraday warning is refreshed on its own hourly schedule
+# (intraday.yml). This job still writes that block when it rebuilds the file.
 #
 # The build script replaces dashboard_data.json only after the document validates.
 # A refused or crashed build exits non-zero, so this job never reaches the commit

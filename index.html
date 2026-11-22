@@ -96,6 +96,21 @@ h1{font-weight:800;font-size:clamp(36px,5.4vw,62px);line-height:1.09;
 
 .notice{margin-top:22px;background:var(--warnbg);border:2px solid var(--warnbd);
   color:var(--warnfg);padding:14px 18px;border-radius:8px;font-size:16.5px;font-weight:500}
+.intraday-banner{margin-top:22px;background:color-mix(in srgb, var(--z4) 14%, var(--card));
+  border:2px solid var(--z3);color:var(--ink);padding:16px 18px;border-radius:8px}
+.intraday-banner .kicker{font-weight:800;font-size:14px;letter-spacing:.06em;color:var(--z4)}
+.intraday-banner p{margin:8px 0 0;font-size:16.5px;line-height:1.55}
+.intraday-banner b,.intraday-strip b{font-family:var(--mono);font-weight:700}
+.intraday-strip{margin:0 26px 16px;border:2px dashed var(--rule);border-radius:10px;
+  background:var(--sunk);padding:12px 14px 13px}
+.intraday-strip.on{border-style:solid;border-color:var(--z3);
+  background:color-mix(in srgb, var(--z4) 10%, var(--sunk))}
+.intraday-strip .kicker{display:flex;flex-wrap:wrap;align-items:center;gap:8px;
+  font-weight:800;font-size:13.5px;letter-spacing:.04em;color:var(--ink2)}
+.intraday-strip.on .kicker{color:var(--z4)}
+.intraday-strip p{margin:6px 0 0;font-size:15.5px;line-height:1.55;color:var(--ink2)}
+.intraday-strip .tag{font-size:12.5px;font-weight:700;color:var(--z2);
+  background:var(--card);border-radius:20px;padding:1px 8px}
 
 /* 吸顶导航：9 个色块，滚到哪儿都能一键跳 */
 .navbar{
@@ -314,6 +329,7 @@ footer code{font-family:var(--mono);font-size:15px;color:var(--ink);background:v
       </div>
       <div class="composite-spark"><svg id="cSpark" viewBox="0 0 300 64" role="img"></svg></div>
     </div>
+    <div class="intraday-banner" id="intradayBanner" hidden role="status"></div>
     <div class="scale">
       <div class="scale-bar" id="scaleBar"></div>
       <div class="scale-ends"><span id="scaleLo"></span><span id="scaleHi"></span></div>
@@ -370,6 +386,7 @@ footer code{font-family:var(--mono);font-size:15px;color:var(--ink);background:v
 </div>
 <button id="top" type="button" aria-label="Top">↑</button>
 
+<script src="intraday.js"></script>
 <script>
 const NS='http://www.w3.org/2000/svg';
 const el=(t,a={})=>{const n=document.createElementNS(NS,t);for(const k in a)n.setAttribute(k,a[k]);return n;};
@@ -450,9 +467,20 @@ const I18N={
   low:'期内最低',dd52:'距 52 周高点',lastZone:'上次进恐慌区',lastNow:'当前就在恐慌区',
   lastNever:'期内从未进过恐慌区',close:'收盘',daysAgo:n=>`${n} 天前`,
   priceLog:'价格 · 对数',live:'实时',
+  intradayKicker:'盘中预警',intradayTag:'盘中估算',intradayBtc:'比特币',
+  intradayNotOfficial:'不是收盘确认档',intradayLiveCalc:'按现价重算',
+  intradayBasisLow:'当日最低价',intradayBasisLive:'现价',
+  intradayLead:(which,px,depth,tier)=>`若把${which} <b>${px}</b> 当作今天的收盘，恐慌深度是 <b>${depth}</b>，读数进入 <b>${tier}</b>。`,
+  intradayOfficialLine:(date,depth,tier)=>`这是盘中估算，不是收盘确认。官方收盘仍是 <b>${depth}</b>（${tier}${date?`，${date}`:''}）。连续天数、配额和收盘记录都不变。`,
+  intradayLow:(px,depth,tier)=>`当日最低 <b>${px}</b> → 深度 <b>${depth}</b>（${tier}）`,
+  intradayLivePx:(px,depth,tier)=>`现价 <b>${px}</b> → 深度 <b>${depth}</b>（${tier}）`,
+  intradayOfficial:(date,px,depth,tier)=>`官方收盘 ${date} <b>${px}</b> · 深度 <b>${depth}</b>（${tier}）`,
+  intradayGap:(tier,gap)=>`盘中读数离 ${tier} 还差 <b>${gap}</b>`,
+  intradayAsOf:d=>`估算时间 ${d}（北京时间）`,
+  intradayClosed:'上一根 UTC 日线已经收完。留下的最低价只是回顾，不作为当前档。',
   foot:['颜色只表示一件事：这个市场现在在它自己的历史里有多便宜。绿=罕见的便宜，红=罕见的贵。跟涨跌无关。',
    '比特币价格每 30 秒刷新。其余标的没有可直接调用的实时行情，显示最近一个交易日收盘价。',
-   '<b>分位一律按收盘价计算，不随盘中价格变动。</b>五个指标和连续天数判定都建立在收盘价上。',
+   '<b>官方分位按收盘价计算。</b>五个指标和连续天数都建立在收盘价上。比特币另有盘中估算：把当日最低价或现价当作今天的收盘，用同一套深度重算；只有读数进入建仓、加码或重仓才作为盘中预警，不改写收盘档。',
    '纵轴用平方根刻度，四条档位线才拉得开。价格轴取对数。指数按本币计价，未做汇率换算。',
    '贪婪四档（1–4 级贪婪）<b>不是系统信号</b>——系统没有任何卖出逻辑。这四档已经用9个标的的全历史回测验证过：对长牛资产机械卖出的收益和风险调整后收益都显著跑输单纯持有，没有例外，详见验证报告。阈值也不是恐慌档的镜像：纵轴刻意把恐慌端拉开了，镜像过去四条线会叠在一起。',
    '右侧徽章直接对应系统的四级恐慌档，百分比是该档要投的配额。但它只回答「当前读数落在哪一档」——<b>真正触发还要同时满足连续天数、BTC 的 AHR999 门槛，以及 30 日窗口和总量闸门</b>。系统没有卖出逻辑，所以没有卖出档，高位的「贵」由颜色表达。',
@@ -509,9 +537,20 @@ const I18N={
   low:'Period low',dd52:'From 52w high',lastZone:'Last in fear zone',lastNow:'In fear zone now',
   lastNever:'Never in fear zone',close:'Close',daysAgo:n=>`${n}d ago`,
   priceLog:'Price · log',live:'live',
+  intradayKicker:'Intraday warning',intradayTag:'Intraday estimate',intradayBtc:'Bitcoin',
+  intradayNotOfficial:'not a confirmed close',intradayLiveCalc:'live',
+  intradayBasisLow:"today's low",intradayBasisLive:'the live price',
+  intradayLead:(which,px,depth,tier)=>`If ${which} <b>${px}</b> were today's close, the fear depth would be <b>${depth}</b>, inside <b>${tier}</b>.`,
+  intradayOfficialLine:(date,depth,tier)=>`This is an intraday estimate, not a confirmed close. The official close is still <b>${depth}</b> (${tier}${date?`, ${date}`:''}). Consecutive days, the allocation and the close record are unchanged.`,
+  intradayLow:(px,depth,tier)=>`Session low <b>${px}</b> → depth <b>${depth}</b> (${tier})`,
+  intradayLivePx:(px,depth,tier)=>`Live <b>${px}</b> → depth <b>${depth}</b> (${tier})`,
+  intradayOfficial:(date,px,depth,tier)=>`Official close ${date} <b>${px}</b> · depth <b>${depth}</b> (${tier})`,
+  intradayGap:(tier,gap)=>`Intraday reading is <b>${gap}</b> above ${tier}`,
+  intradayAsOf:d=>`Estimate at ${d} (Beijing time)`,
+  intradayClosed:'The previous UTC daily candle has closed. A low kept below is a look-back, not the current tier.',
   foot:['Colour says one thing: how cheap this market is relative to its own history. Green = rarely this cheap, red = rarely this expensive. Not about up or down.',
    'Bitcoin price refreshes every 30s. The others have no directly callable live feed, so the last close is shown.',
-   '<b>Percentiles always use closing prices</b> — the five indicators and the consecutive-day rules are all built on closes.',
+   '<b>The official percentile uses the daily close.</b> The five indicators and the consecutive-day rule are built on closes. Bitcoin also has an intraday estimate: the session low and the live price are each scored as if they were today’s close. A warning is shown only when that reading reaches Enter, Add or Load up, and it never rewrites the official close.',
    'Vertical axis is square-root scaled so the four tier lines separate. Price axis is logarithmic. Indices are in local currency, not FX-converted.',
    'The four greed levels are <b>not system signals</b> — the system has no sell logic. They have been backtested across all 9 assets’ full history: mechanically selling long-bull assets significantly underperforms simply holding, on both return and risk-adjusted return, with no exception — see the validation report.',
    'The badge maps directly to the four system fear levels; the percentage is that tier’s allocation. It only answers which tier the current reading falls in — <b>actual triggering also requires the consecutive-day rule, the AHR999 gate, and the window and total budget throttles</b>. The system has no sell logic, so there are no sell tiers; expensive readings are conveyed by colour alone.',
@@ -941,6 +980,15 @@ function panel(a,tiers,idx,containerId='panels'){
       <span>${T().close} <b>${a.latest.date}</b></span>
     </div>`;
 
+  if(a.symbol==='BTC-USD'){
+    const strip=document.createElement('div');
+    strip.id='intradayStrip';
+    strip.className='intraday-strip';
+    const meta=box.querySelector('.pmeta');
+    if(meta) meta.insertAdjacentElement('afterend', strip);
+    fillIntradayStrip(strip);
+  }
+
   const chart=document.createElement('div');chart.className='pchart';
   const W=880,PH=96,GAP=12,FH=260,H=PH+GAP+FH+34,PL=8,PR=76;
   const svg=el('svg',{viewBox:`0 0 ${W} ${H}`,role:'img'});
@@ -1097,7 +1145,12 @@ function summaryText(){
   const tail=LANG==='en'
     ? `${inZ.length}/${core.length} in fear zone`
     : `${core.length} 个标的，${inZ.length} 个在恐慌区`;
-  return [head,tail,'',...lines].join('\n');
+  const extra=(INTRADAY_VIEW&&INTRADAY_VIEW.active)
+    ? [(LANG==='en'
+        ? `BTC intraday warning ${fmt(INTRADAY_VIEW.value)} ${INTRADAY_VIEW.zone} (not the official close)`
+        : `比特币盘中预警 ${fmt(INTRADAY_VIEW.value)} ${INTRADAY_VIEW.zone_name||''}（不是收盘档）`)]
+    : [];
+  return [head,tail,...extra,'',...lines].join('\n');
 }
 
 /* ================= 综合指数 ================= */
@@ -1138,6 +1191,8 @@ function draw(){
   buildNav(list,DATA.tiers);
   $('#panels').innerHTML='';
   list.forEach((a,i)=>panel(a,DATA.tiers,i));
+  renderIntradayBanner();
+  startIntraday();
 
   // 独立展示标的：同一套 panel() 渲染，单独一节、不进上面9个标的的分布/导航，
   // idx 接着主列表往后编号，避免 SVG 渐变 id（hb0/hb1...）在两节之间撞车。
@@ -1287,6 +1342,164 @@ function renderChinaRates(){
   }
 }
 
+/* ================= 比特币盘中预警 =================
+   官方徽章仍是收盘分位。这里把当日最低价和现价各自当成今天的收盘，
+   用 intraday.js 里同一套五分量展开百分位重算，再按 alternative.me 权重混合。
+   只有建仓 / 加码 / 重仓才打横幅。收盘后横幅撤下，不改 latest，也不算连续天数。 */
+let INTRADAY_VIEW=null, intradayGen=0, intradayTick=null;
+function nextUtcDay(iso){
+  const d=new Date(iso+'T00:00:00Z');
+  d.setUTCDate(d.getUTCDate()+1);
+  return d.toISOString().slice(0,10);
+}
+function beijingNow(){
+  return new Date(Date.now()+8*3600*1000).toISOString().slice(0,19);
+}
+function round3(v){
+  const n=v*1000, f=Math.floor(n), diff=n-f;
+  if(diff>0.5) return (f+1)/1000;
+  if(diff<0.5) return f/1000;
+  return (f%2===0?f:f+1)/1000;
+}
+function intradayZone(v){
+  if(v==null||!DATA) return null;
+  return zoneOf(v, DATA.tiers);
+}
+function intradayTierText(key){
+  if(!key) return T().noTier;
+  const tier=(DATA.tiers||[]).find(x=>x.key===key);
+  if(!tier) return key;
+  return LANG==='en'?`${lvlFull(key)} (${tierName(tier)})`:`${lvlFull(key)}（${tierName(tier)}）`;
+}
+function intradayShort(key){
+  if(!key) return T().noTier;
+  const tier=(DATA.tiers||[]).find(x=>x.key===key);
+  return tier?tierName(tier):key;
+}
+function viewFromSnapshot(block){
+  if(!block||block.version!==1) return null;
+  const today=new Date().toISOString().slice(0,10);
+  if(block.session_date&&block.session_date<today)
+    return Object.assign({}, block, {active:false, session_open:false, closed:true});
+  return block;
+}
+function fillIntradayStrip(node){
+  const v=INTRADAY_VIEW;
+  if(!node) return;
+  if(!v){node.hidden=true;return;}
+  node.hidden=false;
+  const t=T(), on=!!v.active;
+  node.classList.toggle('on', on);
+  const lines=[];
+  if(v.closed) lines.push(`<p>${t.intradayClosed}</p>`);
+  if(v.session_low!=null&&v.low_value!=null)
+    lines.push(`<p>${t.intradayLow(money(v.session_low,'USD'), fmt(v.low_value), intradayShort(v.low_zone))}</p>`);
+  if(v.live_price!=null&&v.live_value!=null)
+    lines.push(`<p>${t.intradayLivePx(money(v.live_price,'USD'), fmt(v.live_value), intradayShort(v.live_zone))}</p>`);
+  if(v.official_value!=null)
+    lines.push(`<p>${t.intradayOfficial(v.official_date, money(v.official_price,'USD'), fmt(v.official_value), intradayShort(v.official_zone))}</p>`);
+  if(!v.closed&&v.value!=null&&(v.zone==='L1'||!v.zone)){
+    const l2=(DATA.tiers||[]).find(x=>x.key==='L2');
+    if(l2&&v.value>l2.max) lines.push(`<p>${t.intradayGap(intradayTierText('L2'), fmt(v.value-l2.max))}</p>`);
+  }
+  if(v.as_of) lines.push(`<p>${t.intradayAsOf(String(v.as_of).slice(0,16).replace('T',' '))}</p>`);
+  const bits=[`<span>${on?t.intradayKicker:t.intradayTag}</span>`];
+  if(v.client) bits.push(`<span class="tag">${t.intradayLiveCalc}</span>`);
+  bits.push(`<span>${t.intradayNotOfficial}</span>`);
+  node.innerHTML=`<div class="kicker">${bits.join('')}</div>${lines.join('')}`;
+}
+function renderIntradayBanner(){
+  const node=$('#intradayBanner');
+  if(!node) return;
+  const v=INTRADAY_VIEW;
+  if(!v||!v.active||v.value==null){node.hidden=true;node.innerHTML='';return;}
+  node.hidden=false;
+  const t=T();
+  const px=v.basis==='live'?v.live_price:v.session_low;
+  const which=v.basis==='live'?t.intradayBasisLive:t.intradayBasisLow;
+  node.innerHTML=`<div class="kicker">${t.intradayKicker} · ${t.intradayBtc}</div>
+    <p>${t.intradayLead(which, money(px,'USD'), fmt(v.value), intradayTierText(v.zone))}</p>
+    <p>${t.intradayOfficialLine(v.official_date, fmt(v.official_value), intradayTierText(v.official_zone))}</p>`;
+}
+function paintIntraday(){
+  renderIntradayBanner();
+  const strip=$('#intradayStrip');
+  if(strip) fillIntradayStrip(strip);
+}
+async function refreshIntraday(gen){
+  const block=DATA&&DATA.btc_intraday;
+  if(!block||block.version!==1||!block.model||DATA.demo) return;
+  if(typeof scoreIntraday!=='function'||typeof foldIntraday!=='function') return;
+  const today=new Date().toISOString().slice(0,10);
+  try{
+    const [spotRes, candleRes]=await Promise.all([
+      fetch('https://api.coinbase.com/v2/prices/BTC-USD/spot',{cache:'no-store'}),
+      fetch('https://api.exchange.coinbase.com/products/BTC-USD/candles?granularity=86400',{cache:'no-store'}),
+    ]);
+    if(gen!==intradayGen) return;
+    if(!spotRes.ok||!candleRes.ok) throw 0;
+    const spot=await spotRes.json();
+    const candles=await candleRes.json();
+    if(gen!==intradayGen) return;
+    let live=Number(spot&&spot.data&&spot.data.amount);
+    if(!isFinite(live)||live<=0) live=null;
+    if(!Array.isArray(candles)) throw 0;
+    const byDay={};
+    candles.forEach(row=>{
+      const day=new Date(row[0]*1000).toISOString().slice(0,10);
+      const low=Number(row[1]), close=Number(row[4]);
+      if(low>0&&close>0) byDay[day]={low, close};
+    });
+    let model=block.model, cursor=model.history_through;
+    for(let i=0;i<14;i++){
+      const nxt=nextUtcDay(cursor);
+      if(nxt>=today) break;
+      const bar=byDay[nxt];
+      if(!bar) throw 0;
+      model=foldIntraday(model, bar.close, nxt);
+      cursor=nxt;
+    }
+    if(!model||model.history_through>=today) throw 0;
+    const bar=byDay[today];
+    const low=bar?bar.low:null;
+    if(live==null&&bar) live=bar.close;
+    if(low==null&&live==null) throw 0;
+    const weight=Number(block.blend_weight)||0;
+    const fng=block.fng_value==null?null:Number(block.fng_value);
+    const lowV=low==null?null:round3(blendIntraday(scoreIntraday(model, low), weight, fng));
+    const liveV=live==null?null:round3(blendIntraday(scoreIntraday(model, live), weight, fng));
+    let basis, basisPrice, value;
+    if(lowV!=null&&(liveV==null||lowV<=liveV)){basis='session_low';basisPrice=low;value=lowV;}
+    else {basis='live';basisPrice=live;value=liveV;}
+    const zone=intradayZone(value);
+    const key=zone?zone.key:null;
+    const liveZone=liveV==null?null:intradayZone(liveV);
+    const lowZone=lowV==null?null:intradayZone(lowV);
+    INTRADAY_VIEW=Object.assign({}, block, {
+      session_date:today, history_through:model.history_through, session_open:true, closed:false,
+      basis, basis_price:basisPrice, value, zone:key, zone_name:zone?zone.name:null,
+      active:key==='L2'||key==='L3'||key==='L4',
+      live_price:live, live_value:liveV, live_zone:liveZone?liveZone.key:null,
+      session_low:low, low_value:lowV, low_zone:lowZone?lowZone.key:null,
+      fng_carried:!!(block.fng_date&&block.fng_date<today), client:true, as_of:beijingNow(),
+    });
+    if(gen!==intradayGen) return;
+    paintIntraday();
+  }catch(e){
+    if(gen!==intradayGen) return;
+    if(block.session_date&&block.session_date<new Date().toISOString().slice(0,10)){
+      INTRADAY_VIEW=Object.assign({}, block, {active:false, session_open:false, closed:true});
+      paintIntraday();
+    }
+  }
+}
+function startIntraday(){
+  const gen=++intradayGen;
+  intradayTick=()=>refreshIntraday(gen);
+  intradayTick();
+  timers.push(setInterval(intradayTick, 30000));
+}
+
 function paintChrome(){
   const t=T();
   document.documentElement.lang = LANG==='zh'?'zh-CN':'en';
@@ -1347,6 +1560,7 @@ function paintChrome(){
 }
 function render(d){
   DATA=d;
+  INTRADAY_VIEW=viewFromSnapshot(d&&d.btc_intraday);
   $('#demoBanner').hidden=!d.demo;
   paintChrome();
   draw();
@@ -1372,7 +1586,10 @@ $('#top').onclick=()=>window.scrollTo({top:0,behavior:REDUCED?'auto':'smooth'});
 
 // iOS 会冻结后台标签页的定时器，切回来时手动补一次
 document.addEventListener('visibilitychange',()=>{
-  if(!document.hidden) liveTicks.forEach(f=>f());
+  if(!document.hidden){
+    liveTicks.forEach(f=>f());
+    if(intradayTick) intradayTick();
+  }
 });
 addEventListener('scroll',()=>{
   $('#top').classList.toggle('show',scrollY>600);
